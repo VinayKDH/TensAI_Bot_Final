@@ -1,0 +1,80 @@
+[
+  {
+    "id": "1757920157933",
+    "userId": "test-user",
+    "type": "up",
+    "context": {
+      "module": "WebGPT"
+    },
+    "ts": "2025-09-15T07:09:17.933Z"
+  },
+  {
+    "id": "1757922995314",
+    "userId": "user-id-0",
+    "type": "up",
+    "context": {
+      "type": "up",
+      "module": "help"
+    },
+    "ts": "2025-09-15T07:56:35.314Z"
+  },
+  {
+    "id": "1757923468254",
+    "userId": "test-user-123",
+    "type": "up",
+    "context": {
+      "type": "up",
+      "module": "WebGPT",
+      "interaction": "response",
+      "query": "What is AI?"
+    },
+    "ts": "2025-09-15T08:04:28.254Z"
+  },
+  {
+    "id": "1757923468266",
+    "userId": "test-user-456",
+    "type": "down",
+    "context": {
+      "type": "down",
+      "module": "Media Studio",
+      "interaction": "api_success",
+      "attempts": 2
+    },
+    "ts": "2025-09-15T08:04:28.266Z"
+  },
+  {
+    "id": "1757923468266",
+    "userId": "test-user-789",
+    "type": "up",
+    "context": {
+      "type": "up",
+      "module": "Translator",
+      "interaction": "api_error",
+      "error": "Service temporarily unavailable"
+    },
+    "ts": "2025-09-15T08:04:28.266Z"
+  },
+  {
+    "id": "1757923468266",
+    "userId": "test-user-101",
+    "type": "up",
+    "context": {
+      "type": "up",
+      "module": "Summarizer"
+    },
+    "ts": "2025-09-15T08:04:28.266Z"
+  },
+  {
+    "id": "1757923547393",
+    "userId": "user-id-0",
+    "type": "up",
+    "context": {
+      "type": "up",
+      "module": "WebGPT",
+      "interaction": "error",
+      "query": "${userQuery}",
+      "error": "All 3 attempts failed. Last error: HTTP 403: Forbidden"
+    },
+    "ts": "2025-09-15T08:05:47.393Z"
+  }
+]

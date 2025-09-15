@@ -1,0 +1,62 @@
+{
+    "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.21/MicrosoftTeams.schema.json",
+    "manifestVersion": "1.21",
+    "version": "1.0.0",
+    "id": "bc44f95f-fb4b-4021-9eb9-218d9bd8bda1",
+    "developer": {
+        "name": "TensAI_Chatbot",
+        "websiteUrl": "https://dev2.tens-ai.com",
+        "privacyUrl": "https://dev2.tens-ai.com/privacy",
+        "termsOfUseUrl": "https://dev2.tens-ai.com/termofuse"
+    },
+    "icons": {
+        "color": "color.png",
+        "outline": "outline.png"
+    },
+    "name": {
+        "short": "TensAIBotFinal${{APP_NAME_SUFFIX}}",
+        "full": "Full name for TensAIBotFinal"
+    },
+    "description": {
+        "short": "Teams Chatbot for MSIL",
+        "full": "Full description of TensAIBotFinal"
+    },
+    "accentColor": "#FFFFFF",
+    "bots": [
+        {
+            "botId": "bc44f95f-fb4b-4021-9eb9-218d9bd8bda1",
+            "scopes": [
+                "personal",
+                "team",
+                "groupChat"
+            ],
+            "supportsFiles": true,
+            "isNotificationOnly": false,
+            "commandLists": [
+                {
+                    "scopes": [
+                        "personal",
+                        "team",
+                        "groupChat"
+                    ],
+                    "commands": [
+                        {
+                            "title": "helloWorld",
+                            "description": "A helloworld command to send a welcome message"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "composeExtensions": [],
+    "configurableTabs": [],
+    "staticTabs": [],
+    "permissions": [
+        "identity",
+        "messageTeamMembers"
+    ],
+    "validDomains": [
+        "dev2.tens-ai.com"
+    ]
+}
