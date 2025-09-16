@@ -8,7 +8,8 @@ let currentTab = null;
 let selectedText = '';
 let apiConfig = {
     baseUrl: 'https://dev2.tens-ai.com/api',
-    apiKey: null
+    apiKey: null,
+    authBase: 'http://localhost:4001'
 };
 
 // Initialize popup
@@ -111,6 +112,10 @@ function setupEventListeners() {
     document.getElementById('open-help').addEventListener('click', () => {
         chrome.tabs.create({ url: 'https://docs.tens-ai.com' });
     });
+
+    // Auth buttons
+    document.getElementById('login-btn').addEventListener('click', login);
+    document.getElementById('logout-btn').addEventListener('click', logout);
 }
 
 // Switch between module tabs
@@ -155,13 +160,19 @@ function updateQuickActions() {
 function updateStatusIndicator() {
     const statusDot = document.querySelector('.status-dot');
     const statusText = document.querySelector('.status-text');
-    
-    if (apiConfig.apiKey) {
+    const logoutBtn = document.getElementById('logout-btn');
+    const loginBtn = document.getElementById('login-btn');
+
+    if (apiConfig.apiKey || apiConfig.accessToken) {
         statusDot.style.background = '#4CAF50';
         statusText.textContent = 'Ready';
+        logoutBtn.style.display = 'inline-block';
+        loginBtn.style.display = 'none';
     } else {
         statusDot.style.background = '#FF9800';
         statusText.textContent = 'Setup Required';
+        logoutBtn.style.display = 'none';
+        loginBtn.style.display = 'inline-block';
     }
 }
 
@@ -422,13 +433,13 @@ function getPageContent() {
 // API call function
 async function callAPI(endpoint, data) {
     const url = `${apiConfig.baseUrl}${endpoint}`;
-    
+    const headers = { 'Content-Type': 'application/json' };
+    if (apiConfig.apiKey) headers['Authorization'] = `Bearer ${apiConfig.apiKey}`;
+    if (apiConfig.accessToken && !headers['Authorization']) headers['Authorization'] = `Bearer ${apiConfig.accessToken}`;
+
     const response = await fetch(url, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiConfig.apiKey}`
-        },
+        headers,
         body: JSON.stringify(data)
     });
     
@@ -437,6 +448,37 @@ async function callAPI(endpoint, data) {
     }
     
     return await response.json();
+}
+
+// Auth: login via background
+async function login() {
+    try {
+        const resp = await chrome.runtime.sendMessage({ action: 'auth_login', authBase: apiConfig.authBase });
+        if (resp && resp.success) {
+            apiConfig.accessToken = resp.access_token;
+            await chrome.storage.local.set({ accessToken: resp.access_token });
+            updateStatusIndicator();
+        } else {
+            showError('Login failed');
+        }
+    } catch (e) {
+        showError('Login error: ' + e.message);
+    }
+}
+
+// Auth: logout
+async function logout() {
+    try {
+        const resp = await chrome.runtime.sendMessage({ action: 'auth_logout', authBase: apiConfig.authBase });
+        await chrome.storage.local.remove('accessToken');
+        apiConfig.accessToken = null;
+        updateStatusIndicator();
+        if (!(resp && resp.success)) {
+            showNotification('Logged out locally');
+        }
+    } catch (e) {
+        showError('Logout error: ' + e.message);
+    }
 }
 
 // Show loading indicator
@@ -562,13 +604,20 @@ function showNotification(message) {
 // Load settings
 async function loadSettings() {
     try {
-        const settings = await chrome.storage.sync.get(['apiKey', 'baseUrl', 'defaultLanguage']);
+        const settings = await chrome.storage.sync.get(['apiKey', 'baseUrl', 'defaultLanguage', 'authBase']);
+        const local = await chrome.storage.local.get(['accessToken']);
         
         if (settings.apiKey) {
             apiConfig.apiKey = settings.apiKey;
         }
         if (settings.baseUrl) {
             apiConfig.baseUrl = settings.baseUrl;
+        }
+        if (settings.authBase) {
+            apiConfig.authBase = settings.authBase;
+        }
+        if (local.accessToken) {
+            apiConfig.accessToken = local.accessToken;
         }
         if (settings.defaultLanguage) {
             document.getElementById('target-language').value = settings.defaultLanguage;
