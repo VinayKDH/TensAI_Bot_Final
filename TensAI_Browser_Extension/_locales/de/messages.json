@@ -1,0 +1,10 @@
+{
+  "appName": { "message": "TensAI", "description": "Erweiterungsname" },
+  "appDesc": { "message": "KI-gestützte Produktivitätstools fürs Web.", "description": "Beschreibung" },
+  "action_translate": { "message": "Übersetzen", "description": "Aktion Übersetzen" },
+  "action_summarize": { "message": "Zusammenfassen", "description": "Aktion Zusammenfassen" },
+  "action_explain": { "message": "Erklären", "description": "Aktion Erklären" },
+  "settings_title": { "message": "TensAI Einstellungen", "description": "Optionen Titel" }
+}
+
+

@@ -1,0 +1,10 @@
+{
+  "appName": { "message": "TensAI", "description": "Nom de l'extension" },
+  "appDesc": { "message": "Outils de productivité IA pour la navigation web.", "description": "Description" },
+  "action_translate": { "message": "Traduire", "description": "Action traduire" },
+  "action_summarize": { "message": "Résumer", "description": "Action résumer" },
+  "action_explain": { "message": "Expliquer", "description": "Action expliquer" },
+  "settings_title": { "message": "Paramètres TensAI", "description": "Titre des options" }
+}
+
+

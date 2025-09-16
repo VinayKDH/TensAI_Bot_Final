@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TensAI Browser Extension</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">
+                <img src="../../assets/icons/icon-32.png" alt="TensAI" class="logo-img">
+                <h1>TensAI</h1>
+            </div>
+            <div class="status-indicator" id="status-indicator">
+                <span class="status-dot"></span>
+                <span class="status-text">Ready</span>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <h3>Quick Actions</h3>
+            <div class="action-buttons">
+                <button class="action-btn" id="translate-selected">
+                    <i class="icon">🌍</i>
+                    <span>Translate</span>
+                </button>
+                <button class="action-btn" id="summarize-selected">
+                    <i class="icon">📝</i>
+                    <span>Summarize</span>
+                </button>
+                <button class="action-btn" id="generate-text">
+                    <i class="icon">🤖</i>
+                    <span>Generate</span>
+                </button>
+                <button class="action-btn" id="analyze-page">
+                    <i class="icon">🔍</i>
+                    <span>Analyze</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Modules -->
+        <div class="modules">
+            <h3>AI Modules</h3>
+            <div class="module-tabs">
+                <button class="tab-btn active" data-tab="webgpt">WebGPT</button>
+                <button class="tab-btn" data-tab="media">Media</button>
+                <button class="tab-btn" data-tab="translator">Translator</button>
+                <button class="tab-btn" data-tab="summarizer">Summarizer</button>
+                <button class="tab-btn" data-tab="omni">OmniQuest</button>
+            </div>
+
+            <!-- WebGPT Module -->
+            <div class="module-content active" id="webgpt-content">
+                <div class="input-group">
+                    <label for="webgpt-prompt">Enter your prompt:</label>
+                    <textarea id="webgpt-prompt" placeholder="Ask me anything..."></textarea>
+                </div>
+                <div class="input-group">
+                    <label for="webgpt-temperature">Creativity Level:</label>
+                    <input type="range" id="webgpt-temperature" min="0.1" max="1.0" step="0.1" value="0.7">
+                    <span id="temp-value">0.7</span>
+                </div>
+                <button class="primary-btn" id="generate-webgpt">
+                    <i class="icon">🚀</i>
+                    Generate Response
+                </button>
+            </div>
+
+            <!-- Media Studio Module -->
+            <div class="module-content" id="media-content">
+                <div class="input-group">
+                    <label>Media Type:</label>
+                    <div class="radio-group">
+                        <label class="radio-label">
+                            <input type="radio" name="media-type" value="image" checked>
+                            <span>Image</span>
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="media-type" value="video">
+                            <span>Video</span>
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="media-type" value="audio">
+                            <span>Audio</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="media-prompt">Describe what you want to create:</label>
+                    <textarea id="media-prompt" placeholder="A beautiful sunset over mountains..."></textarea>
+                </div>
+                <button class="primary-btn" id="generate-media">
+                    <i class="icon">🎨</i>
+                    Generate Media
+                </button>
+            </div>
+
+            <!-- Translator Module -->
+            <div class="module-content" id="translator-content">
+                <div class="input-group">
+                    <label for="target-language">Target Language:</label>
+                    <select id="target-language">
+                        <option value="es">Spanish</option>
+                        <option value="fr">French</option>
+                        <option value="de">German</option>
+                        <option value="ja">Japanese</option>
+                        <option value="zh">Chinese</option>
+                        <option value="ar">Arabic</option>
+                        <option value="hi">Hindi</option>
+                        <option value="ru">Russian</option>
+                        <option value="pt">Portuguese</option>
+                        <option value="it">Italian</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="translation-text">Text to translate:</label>
+                    <textarea id="translation-text" placeholder="Enter text to translate..."></textarea>
+                </div>
+                <button class="primary-btn" id="translate-text">
+                    <i class="icon">🌍</i>
+                    Translate
+                </button>
+            </div>
+
+            <!-- Summarizer Module -->
+            <div class="module-content" id="summarizer-content">
+                <div class="input-group">
+                    <label for="summary-length">Summary Length:</label>
+                    <select id="summary-length">
+                        <option value="short">Short (1-2 sentences)</option>
+                        <option value="medium" selected>Medium (2-3 paragraphs)</option>
+                        <option value="long">Long (3-4 paragraphs)</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="summarizer-text">Text to summarize:</label>
+                    <textarea id="summarizer-text" placeholder="Paste the text you want to summarize..."></textarea>
+                </div>
+                <button class="primary-btn" id="summarize-text">
+                    <i class="icon">📝</i>
+                    Summarize
+                </button>
+            </div>
+
+            <!-- OmniQuest Module -->
+            <div class="module-content" id="omni-content">
+                <div class="input-group">
+                    <label for="omni-question">Ask a question about the current page:</label>
+                    <textarea id="omni-question" placeholder="What is the main topic of this page?"></textarea>
+                </div>
+                <div class="input-group">
+                    <label for="omni-context">Additional context (optional):</label>
+                    <textarea id="omni-context" placeholder="Any specific areas to focus on..."></textarea>
+                </div>
+                <button class="primary-btn" id="analyze-page-content">
+                    <i class="icon">🔍</i>
+                    Analyze Page
+                </button>
+            </div>
+        </div>
+
+        <!-- Results Area -->
+        <div class="results" id="results" style="display: none;">
+            <div class="results-header">
+                <h4>Results</h4>
+                <button class="close-btn" id="close-results">×</button>
+            </div>
+            <div class="results-content" id="results-content"></div>
+            <div class="results-actions">
+                <button class="secondary-btn" id="copy-result">Copy</button>
+                <button class="secondary-btn" id="insert-result">Insert</button>
+            </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div class="loading" id="loading" style="display: none;">
+            <div class="spinner"></div>
+            <p>Processing your request...</p>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <button class="link-btn" id="open-options">Settings</button>
+            <button class="link-btn" id="open-help">Help</button>
+        </div>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>

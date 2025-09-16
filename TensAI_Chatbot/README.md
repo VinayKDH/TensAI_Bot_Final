@@ -1,28 +1,26 @@
-# TensAI Office Add-in
+# TensAI Teams Chatbot
 
-> **AI-Powered Productivity for Microsoft Office**
+> **AI-Powered Microsoft Teams Bot for Enhanced Productivity**
 
-Bring the power of TensAI directly into your Microsoft Office applications (Word, Excel, PowerPoint, and Outlook) with this comprehensive add-in that provides AI-driven text generation, media creation, translation, summarization, and document analysis.
+The TensAI Teams Chatbot is a comprehensive Microsoft Teams bot that provides AI-driven capabilities directly within Teams conversations. It offers five powerful modules for text generation, media creation, translation, summarization, and document analysis.
 
 ---
 
 ## 🚀 Quick Start
-
-**Get up and running in 15 minutes:**
 
 ```bash
 # 1. Install dependencies
 npm install
 
 # 2. Configure environment
-cp env.example .env
-# Edit .env with your API credentials
+cp .env.example .env
+# Edit .env with your configuration
 
 # 3. Start development server
 npm run dev
 
-# 4. Test in Office
-# Upload manifest.xml to Office 365 Admin Center
+# 4. Test in Teams
+# Upload appPackage/manifest.json to Teams
 ```
 
 ---
@@ -30,14 +28,14 @@ npm run dev
 ## 🎨 Features
 
 ### 🤖 WebGPT
-- AI-powered text generation
-- Conversational AI assistance
+- AI-powered text generation and conversation
 - Context-aware responses
 - Multi-language support
+- Conversation history
 
 ### 🎨 Media Studio
 - **Image Generator**: Create images from text prompts
-- **Video Generator**: Generate videos from descriptions
+- **Video Generator**: Generate videos from descriptions  
 - **Audio Generator**: Create audio content
 - **Image to Image**: Edit and transform existing images
 
@@ -45,12 +43,12 @@ npm run dev
 - **Text Translation**: Translate selected text
 - **Document Translation**: Translate entire documents
 - **Multi-language Support**: 100+ languages
-- **Context Preservation**: Maintain formatting and structure
+- **Context Preservation**: Maintain formatting
 
 ### 📝 Summarizer
 - **Intelligent Summarization**: Extract key points
 - **Customizable Length**: Short, medium, or long summaries
-- **Multiple Formats**: Bullet points, paragraphs, or structured
+- **Multiple Formats**: Bullet points, paragraphs, structured
 - **Context Awareness**: Understand document context
 
 ### 🔍 OmniQuest
@@ -63,12 +61,12 @@ npm run dev
 
 ## 🛠️ Technical Stack
 
-- **Frontend**: HTML5, CSS3, JavaScript (ES6+)
-- **Build Tool**: Webpack 5
-- **Office Integration**: Office.js API
-- **Authentication**: Azure Active Directory
+- **Framework**: Microsoft Teams AI SDK
+- **Runtime**: Node.js with Express.js
+- **UI**: Adaptive Cards
 - **API Integration**: TensAI REST APIs
-- **Deployment**: Azure App Service, AWS S3, Custom servers
+- **Authentication**: Microsoft Bot Framework
+- **Deployment**: Azure Bot Service
 
 ---
 
@@ -76,9 +74,9 @@ npm run dev
 
 - **Node.js**: 16.x or higher
 - **npm**: 8.x or higher
-- **Office 365**: Personal or business account
+- **Microsoft Teams**: Personal or business account
+- **Azure Bot Service**: Bot registration
 - **TensAI API**: Valid API credentials
-- **Web Server**: For hosting the add-in
 
 ---
 
@@ -87,104 +85,102 @@ npm run dev
 ### 1. Clone and Setup
 ```bash
 git clone <repository-url>
-cd TensAI_Office_Addon
+cd TensAI_Chatbot
 npm install
 ```
 
 ### 2. Configure Environment
 ```bash
-cp env.example .env
+cp .env.example .env
 # Edit .env with your configuration
 ```
 
 ### 3. Development
 ```bash
 npm run dev
-# Access at http://localhost:3000
+# Bot will be available for testing
 ```
 
-### 4. Build for Production
+### 4. Deploy to Azure
 ```bash
-npm run build
-# Files will be in dist/ directory
+./deploy.sh
+# Follow deployment prompts
 ```
+
+---
+
+## 📚 Documentation
+
+- **[Code Overview](CODE_OVERVIEW.md)** - Complete codebase overview
+- **[API Integration](API_INTEGRATION_SUMMARY.md)** - API endpoints and integration
+- **[Deployment Guide](FINAL_DEPLOYMENT_SUMMARY.md)** - Production deployment
+- **[Production Config](PRODUCTION_CONFIG.md)** - Production configuration
+- **[WebGPT Implementation](WEBGPT_IMPLEMENTATION_SUMMARY.md)** - WebGPT module details
 
 ---
 
 ## 🚀 Deployment
 
-### Automated Deployment
-```bash
-# Local testing
-./deploy.sh local
+### Azure Bot Service
+1. **Register Bot** in Azure Portal
+2. **Configure App Settings** with your credentials
+3. **Deploy Code** to Azure App Service
+4. **Update Bot Endpoint** in Azure Bot Service
+5. **Upload Manifest** to Teams Admin Center
 
-# Azure deployment
-./deploy.sh azure
-
-# AWS deployment
-./deploy.sh aws
-
-# Custom server
-./deploy.sh custom
+### Environment Variables
+```env
+MICROSOFT_APP_ID=your_bot_id
+MICROSOFT_APP_PASSWORD=your_bot_password
+TENSAI_BASE_URL=https://dev2.tens-ai.com
+TENSAI_API_KEY=your_api_key
 ```
-
-### Manual Deployment
-1. **Build the project**: `npm run build`
-2. **Upload files** to your web server
-3. **Configure HTTPS** and SSL certificates
-4. **Update manifest.xml** with production URLs
-5. **Upload to Office 365** Admin Center
 
 ---
 
 ## 🧪 Testing
 
-### Automated Testing
+### Development Testing
 ```bash
-# Run all tests
-./test.sh all
+# Start development server
+npm run dev
 
-# Run specific test types
-./test.sh unit          # Unit tests
-./test.sh integration   # Integration tests
-./test.sh functional    # Functional tests
-./test.sh performance   # Performance tests
-./test.sh security      # Security tests
+# Test in Teams
+# Use Bot Framework Emulator or Teams client
 ```
 
-### Manual Testing
-1. **Load add-in** in Office applications
-2. **Test each module** (WebGPT, Media Studio, etc.)
-3. **Verify content insertion** works correctly
-4. **Check cross-platform compatibility**
+### Production Testing
+1. **Deploy to staging** environment
+2. **Test all modules** thoroughly
+3. **Verify API connectivity**
+4. **Test user workflows**
+5. **Deploy to production**
 
 ---
 
 ## 🔒 Security
 
-- **HTTPS Enforcement**: All communications encrypted
-- **Authentication**: Azure AD integration
+- **Bot Authentication**: Microsoft Bot Framework
+- **API Security**: Token-based authentication
 - **Input Validation**: Comprehensive data sanitization
-- **CORS Configuration**: Secure cross-origin requests
-- **Rate Limiting**: Prevent API abuse
-- **Security Headers**: Enhanced protection
+- **HTTPS Enforcement**: All communications encrypted
+- **Rate Limiting**: Prevent abuse
 
 ---
 
-## 📊 Performance
+## 📊 Monitoring
 
-- **Fast Loading**: Optimized for quick startup
-- **Efficient APIs**: Cached responses and retry logic
-- **Minimal Resource Usage**: Lightweight and efficient
-- **Responsive Design**: Works on all screen sizes
-- **Offline Support**: Graceful degradation when offline
+- **Application Insights**: Performance and error tracking
+- **Bot Analytics**: Usage statistics and insights
+- **API Monitoring**: Response times and error rates
+- **User Feedback**: Built-in feedback system
 
 ---
 
 ## 🆘 Support
 
 ### Documentation
-- **Complete guides** in the documentation folder
+- **Complete guides** in the documentation files
 - **API reference** for all endpoints
 - **Troubleshooting** for common issues
 
@@ -192,13 +188,6 @@ npm run build
 - **Email**: support@tens-ai.com
 - **Documentation**: https://docs.tens-ai.com
 - **GitHub Issues**: For bug reports
-- **Community Forum**: For discussions
-
-### Common Issues
-- **Add-in not loading**: Check manifest.xml and HTTPS
-- **API errors**: Verify credentials and connectivity
-- **Office integration**: Ensure Office.js is loaded
-- **Performance issues**: Check network and server status
 
 ---
 
@@ -219,10 +208,9 @@ npm audit fix
 ### Release Process
 1. **Update version** in package.json
 2. **Run tests** to ensure quality
-3. **Build and deploy** to staging
-4. **Test thoroughly** in staging environment
-5. **Deploy to production** and monitor
-6. **Notify users** of new features
+3. **Deploy to staging** for validation
+4. **Deploy to production** and monitor
+5. **Notify users** of new features
 
 ---
 
@@ -233,7 +221,6 @@ npm audit fix
 - **Additional Languages**: Extended translation support
 - **Advanced Analytics**: Usage insights and reporting
 - **Team Collaboration**: Shared workspaces and permissions
-- **Mobile Support**: Enhanced mobile Office app integration
 
 ### Long-term Goals
 - **Enterprise Features**: Advanced security and compliance
@@ -263,7 +250,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- **Microsoft** for Office.js and Office Add-in platform
+- **Microsoft** for Teams platform and Bot Framework
 - **TensAI** for providing the AI services
 - **Open Source Community** for various libraries and tools
 - **Contributors** who help improve the project
@@ -279,7 +266,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Ready to supercharge your Office productivity with AI? Get started now! 🚀**
+**Ready to enhance your Teams experience with AI? Get started now! 🚀**
 
 ---
 

@@ -1,0 +1,10 @@
+{
+  "appName": { "message": "TensAI", "description": "扩展名称" },
+  "appDesc": { "message": "面向网页浏览的 AI 生产力工具。", "description": "描述" },
+  "action_translate": { "message": "翻译", "description": "翻译操作" },
+  "action_summarize": { "message": "总结", "description": "总结操作" },
+  "action_explain": { "message": "解释", "description": "解释操作" },
+  "settings_title": { "message": "TensAI 设置", "description": "选项页标题" }
+}
+
+

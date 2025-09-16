@@ -1,0 +1,10 @@
+{
+  "appName": { "message": "TensAI", "description": "拡張機能名" },
+  "appDesc": { "message": "ウェブ閲覧のためのAI生産性ツール。", "description": "説明" },
+  "action_translate": { "message": "翻訳", "description": "翻訳アクション" },
+  "action_summarize": { "message": "要約", "description": "要約アクション" },
+  "action_explain": { "message": "説明", "description": "説明アクション" },
+  "settings_title": { "message": "TensAI 設定", "description": "オプションページタイトル" }
+}
+
+

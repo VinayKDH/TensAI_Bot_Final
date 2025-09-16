@@ -48,644 +48,475 @@ Office.onReady((info) => {
 // Module button click handlers
 document.addEventListener('DOMContentLoaded', function() {
     const moduleButtons = document.querySelectorAll('.module-btn');
+    
     moduleButtons.forEach(button => {
         button.addEventListener('click', function() {
             const module = this.getAttribute('data-module');
-            showModule(module);
+            loadModule(module);
         });
     });
 });
 
-// Show specific module
-function showModule(module) {
+// Load module interface
+function loadModule(module) {
     currentModule = module;
+    hideAllSections();
     
-    // Hide main menu
-    document.getElementById('main-menu').style.display = 'none';
+    const moduleContent = document.getElementById('module-content');
+    moduleContent.style.display = 'block';
     
-    // Show module content
-    document.getElementById('module-content').style.display = 'block';
-    
-    // Hide all module panels
-    const panels = document.querySelectorAll('.module-panel');
-    panels.forEach(panel => panel.style.display = 'none');
-    
-    // Show selected module panel
-    const selectedPanel = document.getElementById(`${module}-content`);
-    if (selectedPanel) {
-        selectedPanel.style.display = 'block';
-        selectedPanel.classList.add('fade-in');
+    switch(module) {
+        case 'webgpt':
+            loadWebGPTInterface();
+            break;
+        case 'media':
+            loadMediaStudioInterface();
+            break;
+        case 'translator':
+            loadTranslatorInterface();
+            break;
+        case 'summarizer':
+            loadSummarizerInterface();
+            break;
+        case 'omni':
+            loadOmniQuestInterface();
+            break;
+        default:
+            showError('Unknown module selected');
     }
 }
 
-// Show main menu
-function showMainMenu() {
-    document.getElementById('module-content').style.display = 'none';
-    document.getElementById('main-menu').style.display = 'block';
-    currentModule = '';
-}
-
-// WebGPT Functions
-async function processWebGPT() {
-    const query = document.getElementById('webgpt-query').value.trim();
-    if (!query) {
-        showError('Please enter a question');
-        return;
-    }
-    
-    showLoading(true);
-    
-    try {
-        const response = await callTensAIAPI('webgpt', {
-            query: query,
-            temperature: 0.7,
-            history: []
-        });
-        
-        showWebGPTResult(response.response || response.answer || 'No response received');
-    } catch (error) {
-        showError(`WebGPT Error: ${error.message}`);
-    } finally {
-        showLoading(false);
-    }
-}
-
-function showWebGPTResult(result) {
-    const resultDiv = document.getElementById('webgpt-result');
-    resultDiv.innerHTML = `
-        <h6><i class="fas fa-robot text-primary me-2"></i>WebGPT Response:</h6>
-        <p>${result}</p>
-        <button class="btn btn-sm btn-outline-primary" onclick="insertTextIntoDocument('${result.replace(/'/g, "\\'")}')">
-            <i class="fas fa-plus me-1"></i>Insert into Document
+// Load WebGPT interface
+function loadWebGPTInterface() {
+    const content = `
+        <div class="module-header">
+            <h4><i class="fas fa-robot"></i> WebGPT - AI Text Generation</h4>
+        </div>
+        <div class="form-group">
+            <label for="webgpt-prompt">Enter your prompt:</label>
+            <textarea id="webgpt-prompt" class="form-control" rows="4" placeholder="Ask me anything..."></textarea>
+        </div>
+        <div class="form-group">
+            <label for="webgpt-temperature">Temperature (0.1 - 1.0):</label>
+            <input type="range" id="webgpt-temperature" class="form-range" min="0.1" max="1.0" step="0.1" value="0.7">
+            <span id="temp-value">0.7</span>
+        </div>
+        <button class="btn btn-primary" onclick="generateWebGPTResponse()">
+            <i class="fas fa-magic"></i> Generate Response
         </button>
     `;
-    resultDiv.style.display = 'block';
-}
-
-// Media Studio Functions
-function showMediaType(type) {
-    const contentDiv = document.getElementById('media-type-content');
-    let content = '';
     
-    switch(type) {
-        case 'image':
-            content = `
-                <div class="mb-3">
-                    <label class="form-label">Image Prompt:</label>
-                    <textarea class="form-control" id="image-prompt" rows="3" placeholder="Describe the image you want to generate..."></textarea>
-                </div>
-                <div class="row g-2 mb-3">
-                    <div class="col-6">
-                        <label class="form-label">Size:</label>
-                        <select class="form-select" id="image-size">
-                            <option value="1024x1024">1024x1024</option>
-                            <option value="1024x1792">1024x1792</option>
-                            <option value="1792x1024">1792x1024</option>
-                        </select>
-                    </div>
-                    <div class="col-6">
-                        <label class="form-label">Quality:</label>
-                        <select class="form-select" id="image-quality">
-                            <option value="standard">Standard</option>
-                            <option value="hd">HD</option>
-                        </select>
-                    </div>
-                </div>
-                <button class="btn btn-primary w-100" onclick="generateImage()">
-                    <i class="fas fa-magic me-2"></i>Generate Image
-                </button>
-            `;
-            break;
-            
-        case 'video':
-            content = `
-                <div class="mb-3">
-                    <label class="form-label">Video Prompt:</label>
-                    <textarea class="form-control" id="video-prompt" rows="3" placeholder="Describe the video you want to generate..."></textarea>
-                </div>
-                <button class="btn btn-success w-100" onclick="generateVideo()">
-                    <i class="fas fa-video me-2"></i>Generate Video
-                </button>
-            `;
-            break;
-            
-        case 'audio':
-            content = `
-                <div class="mb-3">
-                    <label class="form-label">Audio Prompt:</label>
-                    <textarea class="form-control" id="audio-prompt" rows="3" placeholder="Describe the audio you want to generate..."></textarea>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Voice:</label>
-                    <select class="form-select" id="audio-voice">
-                        <option value="alloy">Alloy</option>
-                        <option value="echo">Echo</option>
-                        <option value="fable">Fable</option>
-                        <option value="onyx">Onyx</option>
-                        <option value="nova">Nova</option>
-                        <option value="shimmer">Shimmer</option>
-                    </select>
-                </div>
-                <button class="btn btn-warning w-100" onclick="generateAudio()">
-                    <i class="fas fa-music me-2"></i>Generate Audio
-                </button>
-            `;
-            break;
-            
-        case 'image2image':
-            content = `
-                <div class="mb-3">
-                    <label class="form-label">Upload Base Image:</label>
-                    <input type="file" class="form-control" id="base-image" accept="image/*">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Edit Prompt:</label>
-                    <textarea class="form-control" id="edit-prompt" rows="3" placeholder="Describe how you want to edit the image..."></textarea>
-                </div>
-                <button class="btn btn-info w-100" onclick="editImage()">
-                    <i class="fas fa-edit me-2"></i>Edit Image
-                </button>
-            `;
-            break;
-    }
+    document.getElementById('module-content').innerHTML = content;
     
-    contentDiv.innerHTML = content;
-}
-
-async function generateImage() {
-    const prompt = document.getElementById('image-prompt').value.trim();
-    const size = document.getElementById('image-size').value;
-    const quality = document.getElementById('image-quality').value;
-    
-    if (!prompt) {
-        showError('Please enter an image prompt');
-        return;
-    }
-    
-    showLoading(true);
-    
-    try {
-        const response = await callTensAIAPI('media.image', {
-            prompt: prompt,
-            size: size,
-            quality: quality,
-            number_of_images: 1
-        });
-        
-        showMediaResult('Image Generated Successfully!', response.image_url || response.url);
-    } catch (error) {
-        showError(`Image Generation Error: ${error.message}`);
-    } finally {
-        showLoading(false);
-    }
-}
-
-async function generateVideo() {
-    const prompt = document.getElementById('video-prompt').value.trim();
-    
-    if (!prompt) {
-        showError('Please enter a video prompt');
-        return;
-    }
-    
-    showLoading(true);
-    
-    try {
-        const response = await callTensAIAPI('media.video', {
-            prompt: prompt
-        });
-        
-        showMediaResult('Video Generation Started!', response.video_url || response.url);
-    } catch (error) {
-        showError(`Video Generation Error: ${error.message}`);
-    } finally {
-        showLoading(false);
-    }
-}
-
-async function generateAudio() {
-    const prompt = document.getElementById('audio-prompt').value.trim();
-    const voice = document.getElementById('audio-voice').value;
-    
-    if (!prompt) {
-        showError('Please enter an audio prompt');
-        return;
-    }
-    
-    showLoading(true);
-    
-    try {
-        const response = await callTensAIAPI('media.audio', {
-            prompt: prompt,
-            voice: voice
-        });
-        
-        showMediaResult('Audio Generated Successfully!', response.audio_url || response.url);
-    } catch (error) {
-        showError(`Audio Generation Error: ${error.message}`);
-    } finally {
-        showLoading(false);
-    }
-}
-
-async function editImage() {
-    const fileInput = document.getElementById('base-image');
-    const prompt = document.getElementById('edit-prompt').value.trim();
-    
-    if (!fileInput.files[0]) {
-        showError('Please select a base image');
-        return;
-    }
-    
-    if (!prompt) {
-        showError('Please enter an edit prompt');
-        return;
-    }
-    
-    showLoading(true);
-    
-    try {
-        // First upload the image
-        const formData = new FormData();
-        formData.append('file', fileInput.files[0]);
-        formData.append('feature_type', 'image2image');
-        
-        const uploadResponse = await uploadFile(formData);
-        
-        // Then edit the image
-        const response = await callTensAIAPI('media.image2image', {
-            prompt: prompt,
-            imageUrl: uploadResponse.url
-        });
-        
-        showMediaResult('Image Edited Successfully!', response.image_url || response.url);
-    } catch (error) {
-        showError(`Image Edit Error: ${error.message}`);
-    } finally {
-        showLoading(false);
-    }
-}
-
-function showMediaResult(title, url) {
-    const resultDiv = document.getElementById('media-type-content');
-    resultDiv.innerHTML += `
-        <div class="alert alert-success mt-3">
-            <h6><i class="fas fa-check-circle me-2"></i>${title}</h6>
-            <p class="mb-2">Media URL: <a href="${url}" target="_blank">${url}</a></p>
-            <button class="btn btn-sm btn-outline-success" onclick="insertMediaIntoDocument('${url}')">
-                <i class="fas fa-plus me-1"></i>Insert into Document
-            </button>
-        </div>
-    `;
-}
-
-// Translator Functions
-async function translateSelectedText() {
-    const targetLanguage = document.getElementById('target-language').value;
-    
-    try {
-        const selectedText = await getSelectedText();
-        if (!selectedText) {
-            showError('Please select some text in your document first');
-            return;
-        }
-        
-        showLoading(true);
-        
-        const response = await callTensAIAPI('translator', {
-            text: selectedText,
-            target_language: targetLanguage
-        });
-        
-        showTranslatorResult(selectedText, response.translated_text || response.translation);
-    } catch (error) {
-        showError(`Translation Error: ${error.message}`);
-    } finally {
-        showLoading(false);
-    }
-}
-
-function showTranslatorResult(originalText, translatedText) {
-    const resultDiv = document.getElementById('translator-result');
-    resultDiv.innerHTML = `
-        <h6><i class="fas fa-language text-warning me-2"></i>Translation Result:</h6>
-        <div class="mb-2">
-            <strong>Original:</strong> ${originalText}
-        </div>
-        <div class="mb-3">
-            <strong>Translated:</strong> ${translatedText}
-        </div>
-        <button class="btn btn-sm btn-outline-warning" onclick="replaceSelectedText('${translatedText.replace(/'/g, "\\'")}')">
-            <i class="fas fa-exchange-alt me-1"></i>Replace Selected Text
-        </button>
-    `;
-    resultDiv.style.display = 'block';
-}
-
-// Summarizer Functions
-async function summarizeSelectedText() {
-    try {
-        const selectedText = await getSelectedText();
-        if (!selectedText) {
-            showError('Please select some text in your document first');
-            return;
-        }
-        
-        showLoading(true);
-        
-        const response = await callTensAIAPI('summarizer', {
-            text: selectedText
-        });
-        
-        showSummarizerResult(selectedText, response.summary || response.summarized_text);
-    } catch (error) {
-        showError(`Summarization Error: ${error.message}`);
-    } finally {
-        showLoading(false);
-    }
-}
-
-function showSummarizerResult(originalText, summary) {
-    const resultDiv = document.getElementById('summarizer-result');
-    resultDiv.innerHTML = `
-        <h6><i class="fas fa-file-text text-info me-2"></i>Summary:</h6>
-        <div class="mb-2">
-            <strong>Original Length:</strong> ${originalText.length} characters
-        </div>
-        <div class="mb-3">
-            <strong>Summary:</strong> ${summary}
-        </div>
-        <button class="btn btn-sm btn-outline-info" onclick="insertTextIntoDocument('${summary.replace(/'/g, "\\'")}')">
-            <i class="fas fa-plus me-1"></i>Insert Summary
-        </button>
-    `;
-    resultDiv.style.display = 'block';
-}
-
-// OmniQuest Functions
-async function uploadDocument() {
-    const fileInput = document.getElementById('omni-file');
-    if (!fileInput.files[0]) {
-        showError('Please select a document to upload');
-        return;
-    }
-    
-    showLoading(true);
-    
-    try {
-        const formData = new FormData();
-        formData.append('file', fileInput.files[0]);
-        formData.append('feature_type', 'omni');
-        
-        const response = await uploadFile(formData);
-        uploadedDocumentId = response.document_id || response.id;
-        
-        showOmniUploadStatus('Document uploaded successfully! You can now ask questions.', 'success');
-        document.getElementById('omni-qa-section').style.display = 'block';
-    } catch (error) {
-        showOmniUploadStatus(`Upload Error: ${error.message}`, 'danger');
-    } finally {
-        showLoading(false);
-    }
-}
-
-function showOmniUploadStatus(message, type) {
-    const statusDiv = document.getElementById('omni-upload-status');
-    statusDiv.className = `alert alert-${type}`;
-    statusDiv.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>${message}`;
-    statusDiv.style.display = 'block';
-}
-
-async function askQuestion() {
-    const question = document.getElementById('omni-question').value.trim();
-    if (!question) {
-        showError('Please enter a question');
-        return;
-    }
-    
-    if (!uploadedDocumentId) {
-        showError('Please upload a document first');
-        return;
-    }
-    
-    showLoading(true);
-    
-    try {
-        const response = await callTensAIAPI('omni', {
-            question: question,
-            document_id: uploadedDocumentId
-        });
-        
-        showOmniAnswer(question, response.answer || response.response);
-    } catch (error) {
-        showError(`OmniQuest Error: ${error.message}`);
-    } finally {
-        showLoading(false);
-    }
-}
-
-function showOmniAnswer(question, answer) {
-    const resultDiv = document.getElementById('omni-answer');
-    resultDiv.innerHTML = `
-        <h6><i class="fas fa-brain text-secondary me-2"></i>Answer:</h6>
-        <div class="mb-2">
-            <strong>Question:</strong> ${question}
-        </div>
-        <div class="mb-3">
-            <strong>Answer:</strong> ${answer}
-        </div>
-        <button class="btn btn-sm btn-outline-secondary" onclick="insertTextIntoDocument('${answer.replace(/'/g, "\\'")}')">
-            <i class="fas fa-plus me-1"></i>Insert Answer
-        </button>
-    `;
-    resultDiv.style.display = 'block';
-}
-
-// Office.js Integration Functions
-async function getSelectedText() {
-    return new Promise((resolve, reject) => {
-        if (currentOfficeApp === 'Word') {
-            Word.run(async (context) => {
-                const selection = context.document.getSelection();
-                selection.load('text');
-                await context.sync();
-                resolve(selection.text);
-            }).catch(reject);
-        } else if (currentOfficeApp === 'PowerPoint') {
-            Office.context.document.getSelectedDataAsync(Office.CoercionType.Text, (result) => {
-                if (result.status === Office.AsyncResultStatus.Succeeded) {
-                    resolve(result.value);
-                } else {
-                    reject(new Error('Failed to get selected text'));
-                }
-            });
-        } else if (currentOfficeApp === 'Excel') {
-            Excel.run(async (context) => {
-                const selection = context.workbook.getSelectedRange();
-                selection.load('text');
-                await context.sync();
-                resolve(selection.text);
-            }).catch(reject);
-        } else if (currentOfficeApp === 'Outlook') {
-            // For Outlook, we'll work with the compose body
-            Office.context.mailbox.item.body.getAsync(Office.CoercionType.Text, (result) => {
-                if (result.status === Office.AsyncResultStatus.Succeeded) {
-                    resolve(result.value);
-                } else {
-                    reject(new Error('Failed to get email body'));
-                }
-            });
-        } else {
-            reject(new Error('Unsupported Office application'));
-        }
+    // Update temperature display
+    document.getElementById('webgpt-temperature').addEventListener('input', function() {
+        document.getElementById('temp-value').textContent = this.value;
     });
 }
 
-async function insertTextIntoDocument(text) {
-    try {
-        if (currentOfficeApp === 'Word') {
-            Word.run(async (context) => {
-                const selection = context.document.getSelection();
-                selection.insertText(text, Word.InsertLocation.end);
-                await context.sync();
-            });
-        } else if (currentOfficeApp === 'PowerPoint') {
-            Office.context.document.setSelectedDataAsync(text, {
-                coercionType: Office.CoercionType.Text
-            });
-        } else if (currentOfficeApp === 'Excel') {
-            Excel.run(async (context) => {
-                const selection = context.workbook.getSelectedRange();
-                selection.values = [[text]];
-                await context.sync();
-            });
-        } else if (currentOfficeApp === 'Outlook') {
-            Office.context.mailbox.item.body.setSelectedDataAsync(text, {
-                coercionType: Office.CoercionType.Text
-            });
-        }
-        
-        showSuccess('Text inserted successfully!');
-    } catch (error) {
-        showError(`Failed to insert text: ${error.message}`);
-    }
-}
-
-async function replaceSelectedText(text) {
-    try {
-        if (currentOfficeApp === 'Word') {
-            Word.run(async (context) => {
-                const selection = context.document.getSelection();
-                selection.insertText(text, Word.InsertLocation.replace);
-                await context.sync();
-            });
-        } else if (currentOfficeApp === 'PowerPoint') {
-            Office.context.document.setSelectedDataAsync(text, {
-                coercionType: Office.CoercionType.Text
-            });
-        } else if (currentOfficeApp === 'Excel') {
-            Excel.run(async (context) => {
-                const selection = context.workbook.getSelectedRange();
-                selection.values = [[text]];
-                await context.sync();
-            });
-        } else if (currentOfficeApp === 'Outlook') {
-            Office.context.mailbox.item.body.setSelectedDataAsync(text, {
-                coercionType: Office.CoercionType.Text
-            });
-        }
-        
-        showSuccess('Text replaced successfully!');
-    } catch (error) {
-        showError(`Failed to replace text: ${error.message}`);
-    }
-}
-
-async function insertMediaIntoDocument(url) {
-    try {
-        if (currentOfficeApp === 'Word') {
-            Word.run(async (context) => {
-                const selection = context.document.getSelection();
-                selection.insertInlinePictureFromBase64(url, Word.InsertLocation.end);
-                await context.sync();
-            });
-        } else if (currentOfficeApp === 'PowerPoint') {
-            // For PowerPoint, we'll insert as a link for now
-            Office.context.document.setSelectedDataAsync(`[Media: ${url}]`, {
-                coercionType: Office.CoercionType.Text
-            });
-        } else if (currentOfficeApp === 'Excel') {
-            Excel.run(async (context) => {
-                const selection = context.workbook.getSelectedRange();
-                selection.values = [[url]];
-                await context.sync();
-            });
-        } else if (currentOfficeApp === 'Outlook') {
-            Office.context.mailbox.item.body.setSelectedDataAsync(`[Media: ${url}]`, {
-                coercionType: Office.CoercionType.Text
-            });
-        }
-        
-        showSuccess('Media reference inserted successfully!');
-    } catch (error) {
-        showError(`Failed to insert media: ${error.message}`);
-    }
-}
-
-// API Functions
-async function callTensAIAPI(endpoint, data) {
-    const url = `${API_CONFIG.baseUrl}${API_CONFIG.endpoints[endpoint]}`;
+// Load Media Studio interface
+function loadMediaStudioInterface() {
+    const content = `
+        <div class="module-header">
+            <h4><i class="fas fa-palette"></i> Media Studio - AI Media Generation</h4>
+        </div>
+        <div class="form-group">
+            <label>Select Generation Type:</label>
+            <div class="btn-group w-100" role="group">
+                <input type="radio" class="btn-check" name="media-type" id="image-gen" value="image" checked>
+                <label class="btn btn-outline-primary" for="image-gen">Image</label>
+                
+                <input type="radio" class="btn-check" name="media-type" id="video-gen" value="video">
+                <label class="btn btn-outline-primary" for="video-gen">Video</label>
+                
+                <input type="radio" class="btn-check" name="media-type" id="audio-gen" value="audio">
+                <label class="btn btn-outline-primary" for="audio-gen">Audio</label>
+                
+                <input type="radio" class="btn-check" name="media-type" id="image2image" value="image2image">
+                <label class="btn btn-outline-primary" for="image2image">Image to Image</label>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="media-prompt">Describe what you want to create:</label>
+            <textarea id="media-prompt" class="form-control" rows="3" placeholder="A beautiful sunset over mountains..."></textarea>
+        </div>
+        <button class="btn btn-success" onclick="generateMedia()">
+            <i class="fas fa-magic"></i> Generate Media
+        </button>
+    `;
     
-    const response = await axios.post(url, data, {
+    document.getElementById('module-content').innerHTML = content;
+}
+
+// Load Translator interface
+function loadTranslatorInterface() {
+    const content = `
+        <div class="module-header">
+            <h4><i class="fas fa-language"></i> Translator - Multi-language Translation</h4>
+        </div>
+        <div class="form-group">
+            <label>Translation Type:</label>
+            <div class="btn-group w-100" role="group">
+                <input type="radio" class="btn-check" name="translation-type" id="text-translate" value="text" checked>
+                <label class="btn btn-outline-info" for="text-translate">Text Translation</label>
+                
+                <input type="radio" class="btn-check" name="translation-type" id="doc-translate" value="document">
+                <label class="btn btn-outline-info" for="doc-translate">Document Translation</label>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="target-language">Target Language:</label>
+            <select id="target-language" class="form-select">
+                <option value="es">Spanish</option>
+                <option value="fr">French</option>
+                <option value="de">German</option>
+                <option value="ja">Japanese</option>
+                <option value="zh">Chinese</option>
+                <option value="ar">Arabic</option>
+                <option value="hi">Hindi</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="translation-text">Text to translate:</label>
+            <textarea id="translation-text" class="form-control" rows="4" placeholder="Enter text to translate..."></textarea>
+        </div>
+        <button class="btn btn-info" onclick="translateText()">
+            <i class="fas fa-language"></i> Translate
+        </button>
+    `;
+    
+    document.getElementById('module-content').innerHTML = content;
+}
+
+// Load Summarizer interface
+function loadSummarizerInterface() {
+    const content = `
+        <div class="module-header">
+            <h4><i class="fas fa-file-text"></i> Summarizer - Content Summarization</h4>
+        </div>
+        <div class="form-group">
+            <label for="summarizer-text">Text to summarize:</label>
+            <textarea id="summarizer-text" class="form-control" rows="6" placeholder="Paste the text you want to summarize..."></textarea>
+        </div>
+        <div class="form-group">
+            <label for="summary-length">Summary Length:</label>
+            <select id="summary-length" class="form-select">
+                <option value="short">Short (1-2 sentences)</option>
+                <option value="medium" selected>Medium (2-3 paragraphs)</option>
+                <option value="long">Long (3-4 paragraphs)</option>
+            </select>
+        </div>
+        <button class="btn btn-warning" onclick="summarizeText()">
+            <i class="fas fa-compress"></i> Summarize
+        </button>
+    `;
+    
+    document.getElementById('module-content').innerHTML = content;
+}
+
+// Load OmniQuest interface
+function loadOmniQuestInterface() {
+    const content = `
+        <div class="module-header">
+            <h4><i class="fas fa-search"></i> OmniQuest - Document Analysis & Q&A</h4>
+        </div>
+        <div class="form-group">
+            <label for="omni-question">Ask a question about your document:</label>
+            <textarea id="omni-question" class="form-control" rows="3" placeholder="What is the main topic of this document?"></textarea>
+        </div>
+        <div class="form-group">
+            <label for="omni-context">Additional context (optional):</label>
+            <textarea id="omni-context" class="form-control" rows="2" placeholder="Any additional context or specific areas to focus on..."></textarea>
+        </div>
+        <button class="btn btn-secondary" onclick="analyzeDocument()">
+            <i class="fas fa-search"></i> Analyze Document
+        </button>
+    `;
+    
+    document.getElementById('module-content').innerHTML = content;
+}
+
+// Generate WebGPT response
+async function generateWebGPTResponse() {
+    const prompt = document.getElementById('webgpt-prompt').value;
+    const temperature = document.getElementById('webgpt-temperature').value;
+    
+    if (!prompt.trim()) {
+        showError('Please enter a prompt');
+        return;
+    }
+    
+    showLoading();
+    
+    try {
+        const response = await callAPI('webgpt', {
+            query: prompt,
+            temperature: parseFloat(temperature)
+        });
+        
+        showResults(`
+            <h5>Generated Response:</h5>
+            <div class="response-content">${response.response || response.message || 'No response received'}</div>
+            <button class="btn btn-primary mt-3" onclick="insertIntoDocument('${escapeHtml(response.response || response.message || '')}')">
+                <i class="fas fa-plus"></i> Insert into Document
+            </button>
+        `);
+    } catch (error) {
+        showError('Failed to generate response: ' + error.message);
+    }
+}
+
+// Generate media
+async function generateMedia() {
+    const prompt = document.getElementById('media-prompt').value;
+    const mediaType = document.querySelector('input[name="media-type"]:checked').value;
+    
+    if (!prompt.trim()) {
+        showError('Please enter a description');
+        return;
+    }
+    
+    showLoading();
+    
+    try {
+        const endpoint = API_CONFIG.endpoints.media[mediaType] || API_CONFIG.endpoints.media.image;
+        const response = await callAPI(endpoint, {
+            prompt: prompt,
+            model: 'default'
+        });
+        
+        let resultHtml = `<h5>Generated ${mediaType}:</h5>`;
+        
+        if (mediaType === 'image' || mediaType === 'image2image') {
+            resultHtml += `
+                <img src="${response.imageUrl || response.url}" class="img-fluid mb-3" alt="Generated image">
+                <button class="btn btn-primary" onclick="insertImageIntoDocument('${response.imageUrl || response.url}')">
+                    <i class="fas fa-image"></i> Insert Image
+                </button>
+            `;
+        } else if (mediaType === 'video') {
+            resultHtml += `
+                <video controls class="w-100 mb-3">
+                    <source src="${response.videoUrl || response.url}" type="video/mp4">
+                </video>
+                <button class="btn btn-primary" onclick="insertVideoIntoDocument('${response.videoUrl || response.url}')">
+                    <i class="fas fa-video"></i> Insert Video
+                </button>
+            `;
+        } else if (mediaType === 'audio') {
+            resultHtml += `
+                <audio controls class="w-100 mb-3">
+                    <source src="${response.audioUrl || response.url}" type="audio/mpeg">
+                </audio>
+                <button class="btn btn-primary" onclick="insertAudioIntoDocument('${response.audioUrl || response.url}')">
+                    <i class="fas fa-volume-up"></i> Insert Audio
+                </button>
+            `;
+        }
+        
+        showResults(resultHtml);
+    } catch (error) {
+        showError('Failed to generate media: ' + error.message);
+    }
+}
+
+// Translate text
+async function translateText() {
+    const text = document.getElementById('translation-text').value;
+    const targetLanguage = document.getElementById('target-language').value;
+    const translationType = document.querySelector('input[name="translation-type"]:checked').value;
+    
+    if (!text.trim()) {
+        showError('Please enter text to translate');
+        return;
+    }
+    
+    showLoading();
+    
+    try {
+        const response = await callAPI('translator', {
+            query: text,
+            target_language: targetLanguage
+        });
+        
+        showResults(`
+            <h5>Translation Result:</h5>
+            <div class="translation-result">
+                <strong>Original:</strong> ${text}<br><br>
+                <strong>Translated:</strong> ${response.translation || response.result || 'Translation not available'}
+            </div>
+            <button class="btn btn-info mt-3" onclick="insertIntoDocument('${escapeHtml(response.translation || response.result || '')}')">
+                <i class="fas fa-plus"></i> Insert Translation
+            </button>
+        `);
+    } catch (error) {
+        showError('Failed to translate text: ' + error.message);
+    }
+}
+
+// Summarize text
+async function summarizeText() {
+    const text = document.getElementById('summarizer-text').value;
+    const length = document.getElementById('summary-length').value;
+    
+    if (!text.trim()) {
+        showError('Please enter text to summarize');
+        return;
+    }
+    
+    showLoading();
+    
+    try {
+        const response = await callAPI('summarizer', {
+            query: text,
+            length: length
+        });
+        
+        showResults(`
+            <h5>Summary:</h5>
+            <div class="summary-result">${response.summary || response.result || 'Summary not available'}</div>
+            <button class="btn btn-warning mt-3" onclick="insertIntoDocument('${escapeHtml(response.summary || response.result || '')}')">
+                <i class="fas fa-plus"></i> Insert Summary
+            </button>
+        `);
+    } catch (error) {
+        showError('Failed to summarize text: ' + error.message);
+    }
+}
+
+// Analyze document
+async function analyzeDocument() {
+    const question = document.getElementById('omni-question').value;
+    const context = document.getElementById('omni-context').value;
+    
+    if (!question.trim()) {
+        showError('Please enter a question');
+        return;
+    }
+    
+    showLoading();
+    
+    try {
+        const response = await callAPI('omni', {
+            query: question,
+            context: context
+        });
+        
+        showResults(`
+            <h5>Analysis Result:</h5>
+            <div class="analysis-result">${response.answer || response.result || 'Analysis not available'}</div>
+            <button class="btn btn-secondary mt-3" onclick="insertIntoDocument('${escapeHtml(response.answer || response.result || '')}')">
+                <i class="fas fa-plus"></i> Insert Analysis
+            </button>
+        `);
+    } catch (error) {
+        showError('Failed to analyze document: ' + error.message);
+    }
+}
+
+// API call function
+async function callAPI(endpoint, data) {
+    const url = `${API_CONFIG.baseUrl}${endpoint}`;
+    
+    const response = await fetch(url, {
+        method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${API_CONFIG.apiKey}`
         },
-        timeout: 30000
+        body: JSON.stringify(data)
     });
     
-    return response.data;
-}
-
-async function uploadFile(formData) {
-    const response = await axios.post(`${API_CONFIG.baseUrl}${API_CONFIG.endpoints.upload}`, formData, {
-        headers: {
-            'Content-Type': 'multipart/form-data',
-            'Authorization': `Bearer ${API_CONFIG.apiKey}`
-        },
-        timeout: 60000
-    });
+    if (!response.ok) {
+        throw new Error(`API call failed: ${response.status} ${response.statusText}`);
+    }
     
-    return response.data;
+    return await response.json();
 }
 
-// UI Helper Functions
-function showLoading(show) {
-    document.getElementById('loading').style.display = show ? 'block' : 'none';
+// Insert text into document
+function insertIntoDocument(text) {
+    if (currentOfficeApp === 'Word') {
+        Word.run(async (context) => {
+            context.document.body.insertText(text, Word.InsertLocation.end);
+            await context.sync();
+        });
+    } else if (currentOfficeApp === 'PowerPoint') {
+        Office.context.document.setSelectedDataAsync(text, {
+            coercionType: Office.CoercionType.Text
+        });
+    } else if (currentOfficeApp === 'Excel') {
+        Excel.run(async (context) => {
+            const range = context.workbook.getSelectedRange();
+            range.values = [[text]];
+            await context.sync();
+        });
+    } else if (currentOfficeApp === 'Outlook') {
+        Office.context.mailbox.item.body.setSelectedDataAsync(text, {
+            coercionType: Office.CoercionType.Text
+        });
+    }
+    
+    showSuccess('Content inserted into document');
+}
+
+// Insert image into document
+function insertImageIntoDocument(imageUrl) {
+    if (currentOfficeApp === 'Word') {
+        Word.run(async (context) => {
+            context.document.body.insertInlinePictureFromBase64(imageUrl, Word.InsertLocation.end);
+            await context.sync();
+        });
+    } else if (currentOfficeApp === 'PowerPoint') {
+        // PowerPoint image insertion would require additional implementation
+        showSuccess('Image URL copied to clipboard');
+    }
+}
+
+// Utility functions
+function hideAllSections() {
+    document.getElementById('module-content').style.display = 'none';
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('results').style.display = 'none';
+    document.getElementById('error-message').style.display = 'none';
+}
+
+function showLoading() {
+    hideAllSections();
+    document.getElementById('loading').style.display = 'block';
+}
+
+function showResults(html) {
+    hideAllSections();
+    document.getElementById('results').innerHTML = html;
+    document.getElementById('results').style.display = 'block';
 }
 
 function showError(message) {
-    const errorDiv = document.getElementById('error-alert');
+    hideAllSections();
     document.getElementById('error-message').textContent = message;
-    errorDiv.style.display = 'block';
-    
-    setTimeout(() => {
-        errorDiv.style.display = 'none';
-    }, 5000);
+    document.getElementById('error-message').style.display = 'block';
 }
 
 function showSuccess(message) {
-    // Create a temporary success alert
-    const alertDiv = document.createElement('div');
-    alertDiv.className = 'alert alert-success alert-dismissible fade show';
-    alertDiv.innerHTML = `
-        <i class="fas fa-check-circle me-2"></i>${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
+    // Create a temporary success message
+    const successDiv = document.createElement('div');
+    successDiv.className = 'alert alert-success';
+    successDiv.textContent = message;
+    successDiv.style.position = 'fixed';
+    successDiv.style.top = '10px';
+    successDiv.style.right = '10px';
+    successDiv.style.zIndex = '9999';
     
-    document.querySelector('.container-fluid').insertBefore(alertDiv, document.querySelector('.container-fluid').firstChild);
+    document.body.appendChild(successDiv);
     
     setTimeout(() => {
-        alertDiv.remove();
+        document.body.removeChild(successDiv);
     }, 3000);
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }

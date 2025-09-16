@@ -1,0 +1,389 @@
+/* TensAI Browser Extension Content Script Styles */
+
+/* Floating Action Button */
+#tensai-floating-button {
+    position: fixed;
+    z-index: 10000;
+    pointer-events: auto;
+}
+
+.tensai-fab {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.tensai-fab-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    transition: all 0.3s ease;
+}
+
+.tensai-fab-icon:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+}
+
+.tensai-fab-menu {
+    display: flex;
+    gap: 8px;
+    background: white;
+    padding: 8px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border: 1px solid #e9ecef;
+}
+
+.tensai-fab-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 60px;
+}
+
+.tensai-fab-item:hover {
+    background: #f8f9ff;
+    transform: translateY(-2px);
+}
+
+.tensai-fab-item .icon {
+    font-size: 16px;
+    margin-bottom: 4px;
+}
+
+.tensai-fab-item .label {
+    font-size: 10px;
+    color: #666;
+    font-weight: 500;
+}
+
+/* Overlay */
+#tensai-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.tensai-overlay-content {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    max-width: 500px;
+    width: 100%;
+    max-height: 80vh;
+    overflow: hidden;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.tensai-overlay-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid #e9ecef;
+    background: #f8f9fa;
+}
+
+.tensai-overlay-header h3 {
+    margin: 0;
+    font-size: 18px;
+    color: #333;
+    font-weight: 600;
+}
+
+.tensai-overlay-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.tensai-overlay-close:hover {
+    background: #e9ecef;
+    color: #333;
+}
+
+.tensai-overlay-body {
+    padding: 20px;
+    max-height: 400px;
+    overflow-y: auto;
+    line-height: 1.6;
+    color: #333;
+}
+
+.tensai-overlay-actions {
+    display: flex;
+    gap: 10px;
+    padding: 20px;
+    border-top: 1px solid #e9ecef;
+    background: #f8f9fa;
+    justify-content: flex-end;
+}
+
+/* Buttons */
+.tensai-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tensai-btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.tensai-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.tensai-btn-secondary {
+    background: #f8f9fa;
+    color: #333;
+    border: 1px solid #e9ecef;
+}
+
+.tensai-btn-secondary:hover {
+    background: #e9ecef;
+}
+
+/* Notifications */
+.tensai-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 10002;
+    animation: slideInRight 0.3s ease;
+    max-width: 300px;
+    word-wrap: break-word;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.tensai-notification-success {
+    background: #4CAF50;
+    color: white;
+}
+
+.tensai-notification-error {
+    background: #f44336;
+    color: white;
+}
+
+.tensai-notification-info {
+    background: #2196F3;
+    color: white;
+}
+
+/* Context Menu Styles */
+.tensai-context-menu {
+    position: fixed;
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 10003;
+    min-width: 200px;
+    overflow: hidden;
+}
+
+.tensai-context-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.tensai-context-menu-item:last-child {
+    border-bottom: none;
+}
+
+.tensai-context-menu-item:hover {
+    background: #f8f9ff;
+}
+
+.tensai-context-menu-item .icon {
+    font-size: 16px;
+    width: 20px;
+    text-align: center;
+}
+
+.tensai-context-menu-item .label {
+    font-size: 14px;
+    color: #333;
+}
+
+/* Selection Highlight */
+.tensai-selection-highlight {
+    background: rgba(102, 126, 234, 0.2) !important;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .tensai-overlay-content {
+        margin: 10px;
+        max-height: 90vh;
+    }
+    
+    .tensai-fab-menu {
+        flex-direction: column;
+        gap: 4px;
+    }
+    
+    .tensai-fab-item {
+        min-width: 50px;
+    }
+    
+    .tensai-notification {
+        right: 10px;
+        left: 10px;
+        max-width: none;
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    .tensai-fab-menu {
+        background: #2d2d2d;
+        border-color: #404040;
+    }
+    
+    .tensai-fab-item:hover {
+        background: #404040;
+    }
+    
+    .tensai-fab-item .label {
+        color: #ccc;
+    }
+    
+    .tensai-overlay-content {
+        background: #2d2d2d;
+        color: #fff;
+    }
+    
+    .tensai-overlay-header {
+        background: #404040;
+        border-color: #555;
+    }
+    
+    .tensai-overlay-actions {
+        background: #404040;
+        border-color: #555;
+    }
+    
+    .tensai-btn-secondary {
+        background: #404040;
+        color: #fff;
+        border-color: #555;
+    }
+    
+    .tensai-btn-secondary:hover {
+        background: #555;
+    }
+    
+    .tensai-context-menu {
+        background: #2d2d2d;
+        border-color: #404040;
+    }
+    
+    .tensai-context-menu-item {
+        border-color: #404040;
+    }
+    
+    .tensai-context-menu-item:hover {
+        background: #404040;
+    }
+    
+    .tensai-context-menu-item .label {
+        color: #fff;
+    }
+}
+
+/* Accessibility */
+.tensai-fab-icon:focus,
+.tensai-fab-item:focus,
+.tensai-btn:focus,
+.tensai-overlay-close:focus {
+    outline: 2px solid #667eea;
+    outline-offset: 2px;
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+    .tensai-fab-icon {
+        border: 2px solid #000;
+    }
+    
+    .tensai-overlay-content {
+        border: 2px solid #000;
+    }
+    
+    .tensai-btn {
+        border: 2px solid #000;
+    }
+}

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TensAI Browser Extension - Settings</title>
+    <link rel="stylesheet" href="options.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">
+                <img src="../../assets/icons/icon-48.png" alt="TensAI" class="logo-img">
+                <h1>TensAI Settings</h1>
+            </div>
+            <p class="subtitle">Configure your TensAI browser extension</p>
+        </div>
+
+        <!-- Settings Form -->
+        <form id="settings-form" class="settings-form">
+            <!-- API Configuration -->
+            <div class="settings-section">
+                <h2>API Configuration</h2>
+                <div class="form-group">
+                    <label for="api-key">API Key *</label>
+                    <input type="password" id="api-key" placeholder="Enter your TensAI API key" required>
+                    <small class="help-text">Get your API key from the TensAI dashboard</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="base-url">Base URL</label>
+                    <input type="url" id="base-url" placeholder="https://dev2.tens-ai.com/api" value="https://dev2.tens-ai.com/api">
+                    <small class="help-text">Default: https://dev2.tens-ai.com/api</small>
+                </div>
+            </div>
+
+            <!-- General Settings -->
+            <div class="settings-section">
+                <h2>General Settings</h2>
+                
+                <div class="form-group">
+                    <label for="default-language">Default Translation Language</label>
+                    <select id="default-language">
+                        <option value="es">Spanish</option>
+                        <option value="fr">French</option>
+                        <option value="de">German</option>
+                        <option value="ja">Japanese</option>
+                        <option value="zh">Chinese</option>
+                        <option value="ar">Arabic</option>
+                        <option value="hi">Hindi</option>
+                        <option value="ru">Russian</option>
+                        <option value="pt">Portuguese</option>
+                        <option value="it">Italian</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="default-temperature">Default Creativity Level</label>
+                    <input type="range" id="default-temperature" min="0.1" max="1.0" step="0.1" value="0.7">
+                    <div class="range-labels">
+                        <span>Conservative</span>
+                        <span id="temp-display">0.7</span>
+                        <span>Creative</span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="auto-translate">
+                        <span class="checkmark"></span>
+                        Auto-translate selected text
+                    </label>
+                </div>
+                
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="show-notifications">
+                        <span class="checkmark"></span>
+                        Show desktop notifications
+                    </label>
+                </div>
+            </div>
+
+            <!-- Keyboard Shortcuts -->
+            <div class="settings-section">
+                <h2>Keyboard Shortcuts</h2>
+                <div class="shortcuts-list">
+                    <div class="shortcut-item">
+                        <span class="shortcut-label">Open TensAI Popup</span>
+                        <kbd>Ctrl+Shift+T</kbd>
+                    </div>
+                    <div class="shortcut-item">
+                        <span class="shortcut-label">Quick Translate</span>
+                        <kbd>Ctrl+Shift+L</kbd>
+                    </div>
+                    <div class="shortcut-item">
+                        <span class="shortcut-label">Quick Summarize</span>
+                        <kbd>Ctrl+Shift+S</kbd>
+                    </div>
+                </div>
+                <p class="help-text">You can customize these shortcuts in your browser's extension settings.</p>
+            </div>
+
+            <!-- Privacy & Security -->
+            <div class="settings-section">
+                <h2>Privacy & Security</h2>
+                
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="send-analytics">
+                        <span class="checkmark"></span>
+                        Send anonymous usage analytics
+                    </label>
+                </div>
+                
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="store-history">
+                        <span class="checkmark"></span>
+                        Store query history locally
+                    </label>
+                </div>
+                
+                <div class="form-group">
+                    <button type="button" id="clear-data" class="danger-btn">Clear All Data</button>
+                    <small class="help-text">This will remove all stored settings and history</small>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="actions">
+                <button type="button" id="test-connection" class="secondary-btn">Test Connection</button>
+                <button type="submit" class="primary-btn">Save Settings</button>
+            </div>
+        </form>
+
+        <!-- Status Messages -->
+        <div id="status-message" class="status-message" style="display: none;"></div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <div class="footer-links">
+                <a href="https://docs.tens-ai.com" target="_blank">Documentation</a>
+                <a href="https://support.tens-ai.com" target="_blank">Support</a>
+                <a href="https://tens-ai.com/privacy" target="_blank">Privacy Policy</a>
+            </div>
+            <p class="version">TensAI Browser Extension v1.0.0</p>
+        </div>
+    </div>
+
+    <script src="options.js"></script>
+</body>
+</html>
