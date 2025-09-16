@@ -39,12 +39,7 @@
                         "team",
                         "groupChat"
                     ],
-                    "commands": [
-                        {
-                            "title": "helloWorld",
-                            "description": "A helloworld command to send a welcome message"
-                        }
-                    ]
+                    "commands": []
                 }
             ]
         }

@@ -1,7 +1,6 @@
 // Create HTTP server.
 const express = require("express");
 const { GenericCommandHandler } = require("./genericCommandHandler");
-const { HelloWorldCommandHandler } = require("./helloworldCommandHandler");
 const { adapter } = require("./internal/initialize");
 const { app } = require("./teamsBot");
 
@@ -114,12 +113,6 @@ expressApp.get('/upload', (req, res) => {
 </html>`);
 });
 
-// Listen for user to say 'helloWorld'
-const helloworldCommandHandler = new HelloWorldCommandHandler();
-app.message(helloworldCommandHandler.triggerPatterns, async (context, state) => {
-  const reply = await helloworldCommandHandler.handleCommandReceived(context, state);
-  await sendReply(context, reply);
-});
 
 const genericCommandHandler = new GenericCommandHandler();
 
