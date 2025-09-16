@@ -1,0 +1,257 @@
+/* TensAI Office Add-in Styles */
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+    margin: 0;
+    padding: 0;
+}
+
+.container-fluid {
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+/* Header Styles */
+.text-center h4 {
+    color: #0078d4;
+    font-weight: 600;
+}
+
+/* Module Buttons */
+.module-btn {
+    border: 2px solid;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    min-height: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.module-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    border-width: 3px;
+}
+
+.module-btn i {
+    color: inherit;
+}
+
+/* Module Panels */
+.module-panel {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-top: 10px;
+}
+
+/* Form Controls */
+.form-control, .form-select {
+    border-radius: 8px;
+    border: 2px solid #e9ecef;
+    transition: border-color 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #0078d4;
+    box-shadow: 0 0 0 0.2rem rgba(0, 120, 212, 0.25);
+}
+
+/* Buttons */
+.btn {
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border-width: 2px;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Result Areas */
+.result-area {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 15px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.result-area h6 {
+    color: #495057;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.result-area p {
+    margin-bottom: 0;
+    line-height: 1.5;
+}
+
+/* Loading Spinner */
+.spinner-border {
+    width: 2rem;
+    height: 2rem;
+}
+
+/* Alerts */
+.alert {
+    border-radius: 8px;
+    border: none;
+    font-weight: 500;
+}
+
+.alert-info {
+    background-color: #e3f2fd;
+    color: #1565c0;
+}
+
+.alert-success {
+    background-color: #e8f5e8;
+    color: #2e7d32;
+}
+
+.alert-warning {
+    background-color: #fff3e0;
+    color: #ef6c00;
+}
+
+.alert-danger {
+    background-color: #ffebee;
+    color: #c62828;
+}
+
+/* Office App Info */
+#office-info {
+    background: linear-gradient(135deg, #0078d4, #106ebe);
+    color: white;
+    border: none;
+    border-radius: 8px;
+}
+
+/* File Upload */
+.form-control[type="file"] {
+    padding: 8px;
+}
+
+/* Media Type Buttons */
+.btn-outline-primary:hover {
+    background-color: #0078d4;
+    border-color: #0078d4;
+    color: white;
+}
+
+.btn-outline-success:hover {
+    background-color: #28a745;
+    border-color: #28a745;
+    color: white;
+}
+
+.btn-outline-warning:hover {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    color: #212529;
+}
+
+.btn-outline-info:hover {
+    background-color: #17a2b8;
+    border-color: #17a2b8;
+    color: white;
+}
+
+.btn-outline-secondary:hover {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    color: white;
+}
+
+/* Responsive Design */
+@media (max-width: 400px) {
+    .container-fluid {
+        padding: 10px;
+    }
+    
+    .module-btn {
+        min-height: 80px;
+        padding: 15px !important;
+    }
+    
+    .module-btn i {
+        font-size: 1.5rem !important;
+    }
+    
+    .module-btn .fw-bold {
+        font-size: 0.9rem;
+    }
+    
+    .module-btn small {
+        font-size: 0.75rem;
+    }
+}
+
+/* Animation Classes */
+.fade-in {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.slide-in {
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(0); }
+}
+
+/* Custom Scrollbar */
+.result-area::-webkit-scrollbar {
+    width: 6px;
+}
+
+.result-area::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.result-area::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.result-area::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Success/Error States */
+.success {
+    border-color: #28a745 !important;
+    background-color: #d4edda !important;
+}
+
+.error {
+    border-color: #dc3545 !important;
+    background-color: #f8d7da !important;
+}
+
+/* Icon Colors */
+.text-primary { color: #0078d4 !important; }
+.text-success { color: #28a745 !important; }
+.text-warning { color: #ffc107 !important; }
+.text-info { color: #17a2b8 !important; }
+.text-secondary { color: #6c757d !important; }
