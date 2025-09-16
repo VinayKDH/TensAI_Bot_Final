@@ -234,6 +234,21 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 sendResponse({ success: true });
             })();
             return true;
+
+        case 'auth_refresh':
+            (async () => {
+                try {
+                    const base = request.authBase || 'http://localhost:4001';
+                    const r = await fetch(`${base}/auth/refresh`, { method: 'POST', credentials: 'include' });
+                    const data = await r.json();
+                    if (!r.ok) throw new Error(data.error || 'refresh_failed');
+                    await chrome.storage.local.set({ accessToken: data.access_token });
+                    sendResponse({ success: true, ...data });
+                } catch (e) {
+                    sendResponse({ success: false, error: e.message });
+                }
+            })();
+            return true;
             
         default:
             sendResponse({ error: 'Unknown action' });

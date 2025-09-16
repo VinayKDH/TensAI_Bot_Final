@@ -437,12 +437,25 @@ async function callAPI(endpoint, data) {
     if (apiConfig.apiKey) headers['Authorization'] = `Bearer ${apiConfig.apiKey}`;
     if (apiConfig.accessToken && !headers['Authorization']) headers['Authorization'] = `Bearer ${apiConfig.accessToken}`;
 
-    const response = await fetch(url, {
+    let response = await fetch(url, {
         method: 'POST',
         headers,
         body: JSON.stringify(data)
     });
-    
+    // If unauthorized and we have refresh, attempt refresh once
+    if (response.status === 401 && !apiConfig.apiKey) {
+        const refreshed = await chrome.runtime.sendMessage({ action: 'auth_refresh', authBase: apiConfig.authBase });
+        if (refreshed && refreshed.success) {
+            apiConfig.accessToken = refreshed.access_token;
+            await chrome.storage.local.set({ accessToken: refreshed.access_token });
+            headers['Authorization'] = `Bearer ${apiConfig.accessToken}`;
+            response = await fetch(url, {
+                method: 'POST',
+                headers,
+                body: JSON.stringify(data)
+            });
+        }
+    }
     if (!response.ok) {
         throw new Error(`API call failed: ${response.status} ${response.statusText}`);
     }

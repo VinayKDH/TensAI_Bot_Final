@@ -65,7 +65,6 @@ async function initKeys() {
     publicJwk.kid = 'ephemeral';
     publicJwk.alg = 'RS256';
     publicJwk.use = 'sig';
-    // eslint-disable-next-line no-console
     console.warn('[AuthService] Using ephemeral signing key. Configure JWT_PRIVATE_KEY_PEM for persistence.');
   }
 }
@@ -105,7 +104,6 @@ app.get('/.well-known/jwks.json', (req, res) => {
 
 // Begin OAuth (PKCE placeholder)
 app.get('/auth/login', async (req, res) => {
-  // In production: build authorize URL for AAD with PKCE (code_challenge)
   const redirect = process.env.AAD_REDIRECT_URI || `${req.protocol}://${req.get('host')}/auth/callback`;
   const placeholder = {
     message: 'Auth start (placeholder). Configure Azure AD to enable full PKCE.',
@@ -117,7 +115,6 @@ app.get('/auth/login', async (req, res) => {
 
 // OAuth callback (placeholder exchange)
 app.get('/auth/callback', async (req, res) => {
-  // In production: exchange code for id_token and map to subject
   const subject = 'user@example.com';
   const scopes = ['webgpt:query', 'translate:text'];
   const access = await mintJwt(subject, scopes, ACCESS_TTL_SECONDS);
@@ -131,7 +128,6 @@ app.post('/auth/refresh', async (req, res) => {
   try {
     const token = req.cookies['tensai_refresh'];
     if (!token) return res.status(401).json({ error: 'no_refresh' });
-    // For demo, skip verifying external; verify signature only
     const { payload } = await jwtVerify(token, createRemoteJWKSet(new URL(`${req.protocol}://${req.get('host')}/.well-known/jwks.json`)), {
       issuer: ISSUER,
       audience: AUDIENCE
@@ -167,11 +163,23 @@ app.get('/me', async (req, res) => {
   }
 });
 
+// Teams: mint backend JWT for a given Teams user (dev-only placeholder)
+app.post('/teams/mint', async (req, res) => {
+  try {
+    const { teamsUserId } = req.body || {};
+    if (!teamsUserId) return res.status(400).json({ error: 'teamsUserId_required' });
+    // In production, verify Teams token signature and extract oid/upn
+    const access = await mintJwt(teamsUserId, ['webgpt:query', 'translate:text', 'omni:query'], ACCESS_TTL_SECONDS);
+    return res.json({ access_token: access, token_type: 'Bearer', expires_in: ACCESS_TTL_SECONDS });
+  } catch (e) {
+    return res.status(500).json({ error: 'mint_failed' });
+  }
+});
+
 // Start
 (async () => {
   await initKeys();
   app.listen(PORT, () => {
-    // eslint-disable-next-line no-console
     console.log(`[AuthService] listening on ${PORT}`);
   });
 })();
