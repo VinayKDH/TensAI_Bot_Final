@@ -43,6 +43,42 @@ Office.onReady((info) => {
     document.getElementById('office-info').style.display = 'block';
     
     console.log(`TensAI Add-in initialized for ${currentOfficeApp}`);
+    const btnLogin = document.getElementById('btnLogin');
+    const btnLogout = document.getElementById('btnLogout');
+    const authStatus = document.getElementById('authStatus');
+    if (btnLogin) {
+        btnLogin.addEventListener('click', async () => {
+            try {
+                const authBase = localStorage.getItem('tensai_auth_base') || 'http://localhost:4001';
+                const url = authBase + '/auth/login';
+                Office.context.ui.displayDialogAsync(url, { height: 50, width: 30, displayInIframe: true }, function (asyncResult) {
+                    setTimeout(() => { try { asyncResult.value.close(); } catch(_) {} }, 2000);
+                    localStorage.setItem('tensai_access', 'dev');
+                    if (btnLogin && btnLogout && authStatus) {
+                        btnLogin.style.display = 'none';
+                        btnLogout.style.display = 'inline-block';
+                        authStatus.textContent = 'Signed in';
+                    }
+                });
+            } catch (e) {
+                console.error('Login failed', e);
+            }
+        });
+    }
+    if (btnLogout) {
+        btnLogout.addEventListener('click', async () => {
+            try {
+                const authBase = localStorage.getItem('tensai_auth_base') || 'http://localhost:4001';
+                await fetch(authBase + '/auth/logout', { method: 'POST', credentials: 'include' });
+            } catch (_) {}
+            localStorage.removeItem('tensai_access');
+            if (btnLogin && btnLogout && authStatus) {
+                btnLogin.style.display = 'inline-block';
+                btnLogout.style.display = 'none';
+                authStatus.textContent = 'Signed out';
+            }
+        });
+    }
 });
 
 // Module button click handlers
