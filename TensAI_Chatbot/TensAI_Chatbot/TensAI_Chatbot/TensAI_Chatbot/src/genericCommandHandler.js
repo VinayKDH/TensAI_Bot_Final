@@ -25,7 +25,17 @@ class GenericCommandHandler {
 
     // Handle WebGPT query submission
     if (context.activity.value && context.activity.value.__webgpt_query) {
-      const query = context.activity.value.__webgpt_query;
+      let query = context.activity.value.__webgpt_query;
+      
+      // If query is empty, get it from the text input field
+      if (!query && context.activity.value.user_query) {
+        query = context.activity.value.user_query;
+      }
+      
+      if (!query) {
+        return MessageFactory.text("Please enter a question or select a suggested prompt.");
+      }
+      
       const userId = context.activity.from?.id || 'unknown';
       
       try {
@@ -353,10 +363,97 @@ class GenericCommandHandler {
       return this._createMediaStudioOptionsCard();
     }
 
+    // Handle filter actions
+    if (context.activity.value && context.activity.value.__show_filters) {
+      return this._createFilterCard();
+    }
+
+    if (context.activity.value && context.activity.value.__enterprise_apps) {
+      return this._createEnterpriseAppsCard();
+    }
+
+    if (context.activity.value && context.activity.value.__business_apps) {
+      return this._createBusinessAppsCard();
+    }
+
+    // Handle new module actions
+    if (context.activity.value && context.activity.value.__mom_generate) {
+      const v = context.activity.value;
+      const meetingContent = v.meetingContent;
+      const userId = context.activity.from?.id || 'unknown';
+      
+      if (!meetingContent) {
+        return MessageFactory.text("Please provide meeting content to generate minutes.");
+      }
+      
+      try {
+        const apiResponse = await this.apiService.callModuleAPI("MoM Generator", {
+          message: meetingContent,
+          action: 'generate',
+          content: meetingContent
+        }, userId);
+        
+        return this._createMoMGeneratorResultCard(meetingContent, apiResponse);
+      } catch (error) {
+        console.error('MoM Generator API call failed:', error);
+        return this._createMoMGeneratorErrorCard(meetingContent, error);
+      }
+    }
+
+    if (context.activity.value && context.activity.value.__doc_compare) {
+      const v = context.activity.value;
+      const document1 = v.document1;
+      const document2 = v.document2;
+      const userId = context.activity.from?.id || 'unknown';
+      
+      if (!document1 || !document2) {
+        return MessageFactory.text("Please provide both documents to compare.");
+      }
+      
+      try {
+        const apiResponse = await this.apiService.callModuleAPI("Doc Comparer", {
+          message: "Compare documents",
+          action: 'compare',
+          document1: document1,
+          document2: document2
+        }, userId);
+        
+        return this._createDocComparerResultCard(document1, document2, apiResponse);
+      } catch (error) {
+        console.error('Doc Comparer API call failed:', error);
+        return this._createDocComparerErrorCard(document1, document2, error);
+      }
+    }
+
+    if (context.activity.value && context.activity.value.__effort_estimate) {
+      const v = context.activity.value;
+      const projectDescription = v.projectDescription;
+      const teamSize = v.teamSize;
+      const userId = context.activity.from?.id || 'unknown';
+      
+      if (!projectDescription) {
+        return MessageFactory.text("Please provide project description for effort estimation.");
+      }
+      
+      try {
+        const apiResponse = await this.apiService.callModuleAPI("Effort Estimator", {
+          message: projectDescription,
+          action: 'estimate',
+          projectDescription: projectDescription,
+          teamSize: teamSize
+        }, userId);
+        
+        return this._createEffortEstimatorResultCard(projectDescription, teamSize, apiResponse);
+      } catch (error) {
+        console.error('Effort Estimator API call failed:', error);
+        return this._createEffortEstimatorErrorCard(projectDescription, teamSize, error);
+      }
+    }
+
     // Greeting when user says 'hi' / 'hello' or default show menu
     if (text.toLowerCase() === "hi" || text.toLowerCase() === "hello" || text.toLowerCase() === "menu") {
-      // exact greeting per request
-      const greeting = "Hi I am TensAI Chatbot. Please select the option. WebGPT, Media Studio, Translator, Summarizer.";
+      // Welcome greeting with WebGPT as default
+      const greeting = "👋 Welcome to TensAI! I'm your AI-powered assistant. WebGPT is ready to help you with any questions. You can also explore other modules using the + button below.";
       const menuMessage = this._menuCard();
       // Attach greeting text into the same activity so the bot returns a single activity with text + card
       menuMessage.text = greeting;
@@ -379,7 +476,7 @@ class GenericCommandHandler {
       // Handle menu navigation
       if (moduleName === "menu") {
         const menuMessage = this._menuCard();
-        menuMessage.text = "Hi I am TensAI Chatbot. Please select the option. WebGPT, Media Studio, Translator, Summarizer.";
+        menuMessage.text = "👋 Welcome to TensAI! I'm your AI-powered assistant. WebGPT is ready to help you with any questions. You can also explore other modules using the + button below.";
         return menuMessage;
       }
 
@@ -411,6 +508,22 @@ class GenericCommandHandler {
             if (moduleName === "Media Studio") {
               console.log("Media Studio selected - creating options card");
               return this._createMediaStudioOptionsCard();
+            }
+
+            // Special handling for new modules
+            if (moduleName === "MoM Generator") {
+              console.log("MoM Generator selected - creating input card");
+              return this._createMoMGeneratorInputCard();
+            }
+
+            if (moduleName === "Doc Comparer") {
+              console.log("Doc Comparer selected - creating input card");
+              return this._createDocComparerInputCard();
+            }
+
+            if (moduleName === "Effort Estimator") {
+              console.log("Effort Estimator selected - creating input card");
+              return this._createEffortEstimatorInputCard();
             }
 
       // For other modules, call the API directly
@@ -616,7 +729,7 @@ class GenericCommandHandler {
   }
 
   _menuCard() {
-    // Beautiful Adaptive Card with enhanced design
+    // ChatGPT-style mobile UI with WebGPT as default
     const card = {
       type: "AdaptiveCard",
       $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
@@ -624,26 +737,16 @@ class GenericCommandHandler {
       body: [
         {
           type: "Container",
-          style: "emphasis",
-          backgroundImage: {
-            url: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 100'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23007ACC;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%2300A4EF;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='400' height='100' fill='url(%23grad)'/%3E%3C/svg%3E",
-            fillMode: "cover"
-          },
+          style: "default",
+          spacing: "None",
           items: [
             {
               type: "TextBlock",
-              size: "ExtraLarge",
+              text: "🤖 TensAI",
+              size: "Large",
               weight: "Bolder",
-              text: "🤖 TensAI Assistant",
-              color: "Light",
-              horizontalAlignment: "Center"
-            },
-            {
-              type: "TextBlock",
-              text: "Your AI-powered productivity companion",
-              color: "Light",
               horizontalAlignment: "Center",
-              size: "Medium"
+              spacing: "Medium"
             }
           ]
         },
@@ -653,17 +756,268 @@ class GenericCommandHandler {
           items: [
             {
               type: "TextBlock",
-              text: "Choose from our powerful AI modules to get started:",
-              wrap: true,
+              text: "👋 Welcome! I'm your AI-powered assistant.",
               size: "Medium",
+              horizontalAlignment: "Center",
+              color: "Accent",
               weight: "Bolder",
-              color: "Accent"
+              spacing: "Small"
+            }
+          ]
+        },
+        {
+          type: "Container",
+          spacing: "Large",
+          items: [
+            {
+              type: "TextBlock",
+              text: "How can I help you today?",
+              size: "Medium",
+              horizontalAlignment: "Center",
+              color: "Default",
+              spacing: "Medium"
+            }
+          ]
+        },
+        {
+          type: "Container",
+          spacing: "Medium",
+          items: [
+            {
+              type: "ActionSet",
+              actions: [
+                {
+                  type: "Action.Submit",
+                  title: "Plan a trip to experience Seoul like a local",
+                  data: { __webgpt_query: "Plan a trip to experience Seoul like a local" },
+                  style: "default"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          type: "Container",
+          spacing: "Medium",
+          items: [
+            {
+              type: "ActionSet",
+              actions: [
+                {
+                  type: "Action.Submit",
+                  title: "Quiz me on words to enhance my grammar",
+                  data: { __webgpt_query: "Quiz me on words to enhance my grammar" },
+                  style: "default"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          type: "Container",
+          spacing: "Medium",
+          items: [
+            {
+              type: "ActionSet",
+              actions: [
+                {
+                  type: "Action.Submit",
+                  title: "Help me write a professional email",
+                  data: { __webgpt_query: "Help me write a professional email" },
+                  style: "default"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          type: "Container",
+          spacing: "Medium",
+          items: [
+            {
+              type: "ActionSet",
+              actions: [
+                {
+                  type: "Action.Submit",
+                  title: "Explain quantum computing in simple terms",
+                  data: { __webgpt_query: "Explain quantum computing in simple terms" },
+                  style: "default"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          type: "Container",
+          spacing: "Large",
+          items: [
+            {
+              type: "ActionSet",
+              actions: [
+                {
+                  type: "Action.Submit",
+                  title: "+",
+                  data: { __show_filters: true },
+                  style: "default"
+                }
+              ],
+              horizontalAlignment: "Center"
+            }
+          ]
+        },
+        {
+          type: "Container",
+          spacing: "Medium",
+          items: [
+            {
+              type: "Input.Text",
+              id: "user_query",
+              placeholder: "Ask anything...",
+              isMultiline: false
+            }
+          ]
+        },
+        {
+          type: "Container",
+          spacing: "Medium",
+          items: [
+            {
+              type: "ActionSet",
+              actions: [
+                {
+                  type: "Action.Submit",
+                  title: "Send",
+                  data: { __webgpt_query: "" },
+                  style: "positive"
+                }
+              ],
+              horizontalAlignment: "Center"
+            }
+          ]
+        }
+      ],
+      actions: []
+    };
+    
+    return MessageFactory.attachment(CardFactory.adaptiveCard(card));
+  }
+
+  _createFilterCard() {
+    const card = {
+      type: "AdaptiveCard",
+      $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
+      version: "1.4",
+      body: [
+        {
+          type: "Container",
+          spacing: "Medium",
+          items: [
+            {
+              type: "TextBlock",
+              text: "Choose Application Type",
+              size: "Large",
+              weight: "Bolder",
+              horizontalAlignment: "Center"
+            }
+          ]
+        },
+        {
+          type: "Container",
+          spacing: "Medium",
+          items: [
+            {
+              type: "ActionSet",
+              actions: [
+                {
+                  type: "Action.Submit",
+                  title: "Enterprise Application",
+                  data: { __enterprise_apps: true },
+                  style: "positive"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          type: "Container",
+          spacing: "Medium",
+          items: [
+            {
+              type: "ActionSet",
+              actions: [
+                {
+                  type: "Action.Submit",
+                  title: "Business Application",
+                  data: { __business_apps: true },
+                  style: "positive"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          type: "Container",
+          spacing: "Medium",
+          items: [
+            {
+              type: "ActionSet",
+              actions: [
+                {
+                  type: "Action.Submit",
+                  title: "← Back",
+                  data: { module: "menu" },
+                  style: "default"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      actions: []
+    };
+    
+    return MessageFactory.attachment(CardFactory.adaptiveCard(card));
+  }
+
+  _createEnterpriseAppsCard() {
+    const card = {
+      type: "AdaptiveCard",
+      $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
+      version: "1.4",
+      body: [
+        {
+          type: "Container",
+          spacing: "Medium",
+          items: [
+            {
+              type: "TextBlock",
+              text: "Enterprise Applications",
+              size: "Large",
+              weight: "Bolder",
+              horizontalAlignment: "Center"
             }
           ]
         },
         {
           type: "ColumnSet",
           columns: [
+            {
+              type: "Column",
+              width: "stretch",
+              items: [
+                {
+                  type: "ActionSet",
+                  actions: [
+                    {
+                      type: "Action.Submit",
+                      title: "🌐 Translator",
+                      data: { module: "Translator" },
+                      style: "positive"
+                    }
+                  ]
+                }
+              ]
+            },
             {
               type: "Column",
               width: "stretch",
@@ -680,7 +1034,12 @@ class GenericCommandHandler {
                   ]
                 }
               ]
-            },
+            }
+          ]
+        },
+        {
+          type: "ColumnSet",
+          columns: [
             {
               type: "Column",
               width: "stretch",
@@ -697,12 +1056,7 @@ class GenericCommandHandler {
                   ]
                 }
               ]
-            }
-          ]
-        },
-        {
-          type: "ColumnSet",
-          columns: [
+            },
             {
               type: "Column",
               width: "stretch",
@@ -714,23 +1068,6 @@ class GenericCommandHandler {
                       type: "Action.Submit",
                       title: "🔍 OmniQuest",
                       data: { module: "OmniQuest" },
-                      style: "positive"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              type: "Column",
-              width: "stretch",
-              items: [
-                {
-                  type: "ActionSet",
-                  actions: [
-                    {
-                      type: "Action.Submit",
-                      title: "🌐 Translator",
-                      data: { module: "Translator" },
                       style: "positive"
                     }
                   ]
@@ -768,9 +1105,48 @@ class GenericCommandHandler {
                   actions: [
                     {
                       type: "Action.Submit",
-                      title: "❓ Help",
-                      data: { module: "help" },
-                      style: "default"
+                      title: "📋 MoM Generator",
+                      data: { module: "MoM Generator" },
+                      style: "positive"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          type: "ColumnSet",
+          columns: [
+            {
+              type: "Column",
+              width: "stretch",
+              items: [
+                {
+                  type: "ActionSet",
+                  actions: [
+                    {
+                      type: "Action.Submit",
+                      title: "📊 Doc Comparer",
+                      data: { module: "Doc Comparer" },
+                      style: "positive"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              type: "Column",
+              width: "stretch",
+              items: [
+                {
+                  type: "ActionSet",
+                  actions: [
+                    {
+                      type: "Action.Submit",
+                      title: "⏱️ Effort Estimator",
+                      data: { module: "Effort Estimator" },
+                      style: "positive"
                     }
                   ]
                 }
@@ -780,21 +1156,80 @@ class GenericCommandHandler {
         },
         {
           type: "Container",
-          spacing: "Small",
+          spacing: "Medium",
           items: [
             {
-              type: "TextBlock",
-              text: "💡 **Tip:** You can also type module names directly or say 'help' for assistance",
-              wrap: true,
-              size: "Small",
-              color: "Accent",
-              horizontalAlignment: "Center"
+              type: "ActionSet",
+              actions: [
+                {
+                  type: "Action.Submit",
+                  title: "← Back to Filters",
+                  data: { __show_filters: true },
+                  style: "default"
+                }
+              ]
             }
           ]
         }
       ],
       actions: []
     };
+    
+    return MessageFactory.attachment(CardFactory.adaptiveCard(card));
+  }
+
+  _createBusinessAppsCard() {
+    const card = {
+      type: "AdaptiveCard",
+      $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
+      version: "1.4",
+      body: [
+        {
+          type: "Container",
+          spacing: "Medium",
+          items: [
+            {
+              type: "TextBlock",
+              text: "Business Applications",
+              size: "Large",
+              weight: "Bolder",
+              horizontalAlignment: "Center"
+            }
+          ]
+        },
+        {
+          type: "Container",
+          spacing: "Medium",
+          items: [
+            {
+              type: "TextBlock",
+              text: "Business applications coming soon...",
+              horizontalAlignment: "Center",
+              color: "Default"
+            }
+          ]
+        },
+        {
+          type: "Container",
+          spacing: "Medium",
+          items: [
+            {
+              type: "ActionSet",
+              actions: [
+                {
+                  type: "Action.Submit",
+                  title: "← Back to Filters",
+                  data: { __show_filters: true },
+                  style: "default"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      actions: []
+    };
+    
     return MessageFactory.attachment(CardFactory.adaptiveCard(card));
   }
 
@@ -3433,6 +3868,439 @@ class GenericCommandHandler {
       ],
       actions: []
     };
+  }
+  _createMoMGeneratorInputCard() {
+    const card = {
+      type: "AdaptiveCard",
+      $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
+      version: "1.4",
+      body: [
+        {
+          type: "TextBlock",
+          text: "📋 MoM Generator",
+          size: "Large",
+          weight: "Bolder",
+          horizontalAlignment: "Center"
+        },
+        {
+          type: "TextBlock",
+          text: "Generate meeting minutes from your meeting notes or transcript.",
+          wrap: true,
+          horizontalAlignment: "Center",
+          color: "Default"
+        },
+        {
+          type: "Input.Text",
+          id: "meetingContent",
+          isMultiline: true,
+          maxLength: 5000,
+          placeholder: "Paste your meeting notes, transcript, or key points here...",
+          label: "Meeting Content"
+        },
+        {
+          type: "ActionSet",
+          actions: [
+            {
+              type: "Action.Submit",
+              title: "📋 Generate MoM",
+              data: { __mom_generate: true },
+              style: "positive"
+            },
+            {
+              type: "Action.Submit",
+              title: "🏠 Back to Menu",
+              data: { module: "menu" },
+              style: "default"
+            }
+          ]
+        }
+      ],
+      actions: []
+    };
+    
+    return MessageFactory.attachment(CardFactory.adaptiveCard(card));
+  }
+
+  _createDocComparerInputCard() {
+    const card = {
+      type: "AdaptiveCard",
+      $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
+      version: "1.4",
+      body: [
+        {
+          type: "TextBlock",
+          text: "📊 Doc Comparer",
+          size: "Large",
+          weight: "Bolder",
+          horizontalAlignment: "Center"
+        },
+        {
+          type: "TextBlock",
+          text: "Compare two documents and identify differences, similarities, and key changes.",
+          wrap: true,
+          horizontalAlignment: "Center",
+          color: "Default"
+        },
+        {
+          type: "Input.Text",
+          id: "document1",
+          isMultiline: true,
+          maxLength: 5000,
+          placeholder: "Paste the first document content here...",
+          label: "Document 1"
+        },
+        {
+          type: "Input.Text",
+          id: "document2",
+          isMultiline: true,
+          maxLength: 5000,
+          placeholder: "Paste the second document content here...",
+          label: "Document 2"
+        },
+        {
+          type: "ActionSet",
+          actions: [
+            {
+              type: "Action.Submit",
+              title: "📊 Compare Documents",
+              data: { __doc_compare: true },
+              style: "positive"
+            },
+            {
+              type: "Action.Submit",
+              title: "🏠 Back to Menu",
+              data: { module: "menu" },
+              style: "default"
+            }
+          ]
+        }
+      ],
+      actions: []
+    };
+    
+    return MessageFactory.attachment(CardFactory.adaptiveCard(card));
+  }
+
+  _createEffortEstimatorInputCard() {
+    const card = {
+      type: "AdaptiveCard",
+      $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
+      version: "1.4",
+      body: [
+        {
+          type: "TextBlock",
+          text: "⏱️ Effort Estimator",
+          size: "Large",
+          weight: "Bolder",
+          horizontalAlignment: "Center"
+        },
+        {
+          type: "TextBlock",
+          text: "Estimate effort and time required for your project tasks and features.",
+          wrap: true,
+          horizontalAlignment: "Center",
+          color: "Default"
+        },
+        {
+          type: "Input.Text",
+          id: "projectDescription",
+          isMultiline: true,
+          maxLength: 3000,
+          placeholder: "Describe your project, features, or tasks that need effort estimation...",
+          label: "Project Description"
+        },
+        {
+          type: "Input.Text",
+          id: "teamSize",
+          placeholder: "e.g., 3 developers, 1 designer",
+          label: "Team Size (optional)"
+        },
+        {
+          type: "ActionSet",
+          actions: [
+            {
+              type: "Action.Submit",
+              title: "⏱️ Estimate Effort",
+              data: { __effort_estimate: true },
+              style: "positive"
+            },
+            {
+              type: "Action.Submit",
+              title: "🏠 Back to Menu",
+              data: { module: "menu" },
+              style: "default"
+            }
+          ]
+        }
+      ],
+      actions: []
+    };
+    
+    return MessageFactory.attachment(CardFactory.adaptiveCard(card));
+  }
+
+  _createMoMGeneratorResultCard(meetingContent, apiResponse) {
+    const card = {
+      type: "AdaptiveCard",
+      $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
+      version: "1.4",
+      body: [
+        {
+          type: "TextBlock",
+          text: "📋 Meeting Minutes Generated",
+          size: "Large",
+          weight: "Bolder",
+          horizontalAlignment: "Center"
+        },
+        {
+          type: "TextBlock",
+          text: apiResponse.message || apiResponse.result || "Meeting minutes generated successfully!",
+          wrap: true,
+          spacing: "Medium"
+        },
+        {
+          type: "ActionSet",
+          actions: [
+            {
+              type: "Action.Submit",
+              title: "📋 Generate Another",
+              data: { module: "MoM Generator" },
+              style: "positive"
+            },
+            {
+              type: "Action.Submit",
+              title: "🏠 Back to Menu",
+              data: { module: "menu" },
+              style: "default"
+            }
+          ]
+        }
+      ],
+      actions: []
+    };
+    
+    return MessageFactory.attachment(CardFactory.adaptiveCard(card));
+  }
+
+  _createMoMGeneratorErrorCard(meetingContent, error) {
+    const card = {
+      type: "AdaptiveCard",
+      $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
+      version: "1.4",
+      body: [
+        {
+          type: "TextBlock",
+          text: "❌ Error Generating Meeting Minutes",
+          size: "Large",
+          weight: "Bolder",
+          color: "Attention",
+          horizontalAlignment: "Center"
+        },
+        {
+          type: "TextBlock",
+          text: `Failed to generate meeting minutes: ${error.message || error}`,
+          wrap: true,
+          color: "Attention",
+          spacing: "Medium"
+        },
+        {
+          type: "ActionSet",
+          actions: [
+            {
+              type: "Action.Submit",
+              title: "🔄 Try Again",
+              data: { module: "MoM Generator" },
+              style: "positive"
+            },
+            {
+              type: "Action.Submit",
+              title: "🏠 Back to Menu",
+              data: { module: "menu" },
+              style: "default"
+            }
+          ]
+        }
+      ],
+      actions: []
+    };
+    
+    return MessageFactory.attachment(CardFactory.adaptiveCard(card));
+  }
+
+  _createDocComparerResultCard(document1, document2, apiResponse) {
+    const card = {
+      type: "AdaptiveCard",
+      $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
+      version: "1.4",
+      body: [
+        {
+          type: "TextBlock",
+          text: "📊 Document Comparison Results",
+          size: "Large",
+          weight: "Bolder",
+          horizontalAlignment: "Center"
+        },
+        {
+          type: "TextBlock",
+          text: apiResponse.message || apiResponse.result || "Document comparison completed successfully!",
+          wrap: true,
+          spacing: "Medium"
+        },
+        {
+          type: "ActionSet",
+          actions: [
+            {
+              type: "Action.Submit",
+              title: "📊 Compare Another",
+              data: { module: "Doc Comparer" },
+              style: "positive"
+            },
+            {
+              type: "Action.Submit",
+              title: "🏠 Back to Menu",
+              data: { module: "menu" },
+              style: "default"
+            }
+          ]
+        }
+      ],
+      actions: []
+    };
+    
+    return MessageFactory.attachment(CardFactory.adaptiveCard(card));
+  }
+
+  _createDocComparerErrorCard(document1, document2, error) {
+    const card = {
+      type: "AdaptiveCard",
+      $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
+      version: "1.4",
+      body: [
+        {
+          type: "TextBlock",
+          text: "❌ Error Comparing Documents",
+          size: "Large",
+          weight: "Bolder",
+          color: "Attention",
+          horizontalAlignment: "Center"
+        },
+        {
+          type: "TextBlock",
+          text: `Failed to compare documents: ${error.message || error}`,
+          wrap: true,
+          color: "Attention",
+          spacing: "Medium"
+        },
+        {
+          type: "ActionSet",
+          actions: [
+            {
+              type: "Action.Submit",
+              title: "🔄 Try Again",
+              data: { module: "Doc Comparer" },
+              style: "positive"
+            },
+            {
+              type: "Action.Submit",
+              title: "🏠 Back to Menu",
+              data: { module: "menu" },
+              style: "default"
+            }
+          ]
+        }
+      ],
+      actions: []
+    };
+    
+    return MessageFactory.attachment(CardFactory.adaptiveCard(card));
+  }
+
+  _createEffortEstimatorResultCard(projectDescription, teamSize, apiResponse) {
+    const card = {
+      type: "AdaptiveCard",
+      $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
+      version: "1.4",
+      body: [
+        {
+          type: "TextBlock",
+          text: "⏱️ Effort Estimation Results",
+          size: "Large",
+          weight: "Bolder",
+          horizontalAlignment: "Center"
+        },
+        {
+          type: "TextBlock",
+          text: apiResponse.message || apiResponse.result || "Effort estimation completed successfully!",
+          wrap: true,
+          spacing: "Medium"
+        },
+        {
+          type: "ActionSet",
+          actions: [
+            {
+              type: "Action.Submit",
+              title: "⏱️ Estimate Another",
+              data: { module: "Effort Estimator" },
+              style: "positive"
+            },
+            {
+              type: "Action.Submit",
+              title: "🏠 Back to Menu",
+              data: { module: "menu" },
+              style: "default"
+            }
+          ]
+        }
+      ],
+      actions: []
+    };
+    
+    return MessageFactory.attachment(CardFactory.adaptiveCard(card));
+  }
+
+  _createEffortEstimatorErrorCard(projectDescription, teamSize, error) {
+    const card = {
+      type: "AdaptiveCard",
+      $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
+      version: "1.4",
+      body: [
+        {
+          type: "TextBlock",
+          text: "❌ Error Estimating Effort",
+          size: "Large",
+          weight: "Bolder",
+          color: "Attention",
+          horizontalAlignment: "Center"
+        },
+        {
+          type: "TextBlock",
+          text: `Failed to estimate effort: ${error.message || error}`,
+          wrap: true,
+          color: "Attention",
+          spacing: "Medium"
+        },
+        {
+          type: "ActionSet",
+          actions: [
+            {
+              type: "Action.Submit",
+              title: "🔄 Try Again",
+              data: { module: "Effort Estimator" },
+              style: "positive"
+            },
+            {
+              type: "Action.Submit",
+              title: "🏠 Back to Menu",
+              data: { module: "menu" },
+              style: "default"
+            }
+          ]
+        }
+      ],
+      actions: []
+    };
+    
+    return MessageFactory.attachment(CardFactory.adaptiveCard(card));
   }
 }
 

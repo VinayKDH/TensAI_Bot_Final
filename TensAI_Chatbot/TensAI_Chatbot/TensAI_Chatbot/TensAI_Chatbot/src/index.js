@@ -199,6 +199,17 @@ expressApp.post("/api/messages", async (req, res) => {
         console.log("SUBMIT ACTION DETECTED - Module:", context.activity.value.module);
       }
     } catch (e) {}
-    await app.run(context);
+    
+    try {
+      await app.run(context);
+    } catch (error) {
+      console.error('Error in app.run:', error);
+      // Send a fallback response
+      try {
+        await context.sendActivity('Sorry, I encountered an error. Please try again or type "menu" to start over.');
+      } catch (sendError) {
+        console.error('Error sending fallback message:', sendError);
+      }
+    }
   });
 });
